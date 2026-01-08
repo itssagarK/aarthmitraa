@@ -59,9 +59,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ state }) => {
   // Master UI Stat Chip Styles
   const statChipClass = "flex flex-col items-center justify-center p-3 rounded-chip min-w-[90px] min-h-[70px] bg-neutral-glass backdrop-blur-md border border-white/40 shadow-sm transition-transform hover:-translate-y-1";
 
+  // Sticky positioning: Assumes header is approx 68px tall.
   return (
-    <div className="sticky top-[72px] z-40 -mx-4 px-4 overflow-x-auto scrollbar-hide">
-      <div className="flex gap-3 pb-2 w-max mx-auto sm:w-full sm:mx-0">
+    <div className="sticky top-[68px] z-40 -mx-4 px-4 pt-2 pb-2 overflow-x-auto scrollbar-hide bg-gradient-to-b from-[#f0fdf9]/80 to-transparent backdrop-blur-sm">
+      <div className="flex gap-3 w-max mx-auto sm:w-full sm:mx-0">
         
         {/* Savings Bubble */}
         <div className={`${statChipClass} group`}>

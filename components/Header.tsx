@@ -16,21 +16,21 @@ export const Header: React.FC<HeaderProps> = ({ language, onLanguageChange }) =>
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 px-4 py-3 backdrop-blur-md bg-white/10 border-b border-white/20">
+    <header className="sticky top-0 left-0 right-0 z-50 w-full px-4 py-3 backdrop-blur-xl bg-white/40 border-b border-white/20 shadow-sm transition-all">
       <div className="max-w-[500px] mx-auto flex items-center justify-between">
         
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="bg-brand p-2 rounded-xl shadow-btn">
+          <div className="bg-brand p-2 rounded-xl shadow-btn shrink-0">
             <Wallet className="w-5 h-5 text-white" strokeWidth={2.5} />
           </div>
-          <h1 className="text-h3 text-brand font-extrabold tracking-tight">
+          <h1 className="text-h3 text-brand font-extrabold tracking-tight truncate">
             {getTranslation(language, 'header_title')}
           </h1>
         </div>
 
         {/* Master UI Segmented Pill Language Switcher */}
-        <div className="flex p-1 rounded-full bg-neutral-glass border border-white/40">
+        <div className="flex p-1 rounded-full bg-neutral-glass border border-white/40 shrink-0">
           {languages.map((lang) => (
             <button
               key={lang.code}

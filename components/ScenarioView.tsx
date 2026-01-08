@@ -14,30 +14,31 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({ event, onMakeChoice,
   const bottomRef = useRef<HTMLDivElement>(null);
   const t = (key: any) => getTranslation(state.language, key);
 
-  // Auto scroll
+  // Auto scroll logic (optional, but keep it smooth)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [event]);
 
   return (
-    <div className="flex flex-col gap-6 pb-24">
+    <div className="flex flex-col gap-6 w-full">
       
       {/* 1. Story Card */}
-      <div className="glass-card p-5 rounded-card text-center sm:text-left">
+      <div className="glass-card p-6 rounded-card text-center sm:text-left w-full">
         <p className="text-h2 text-brand leading-snug">
           {event.narrative_hook}
         </p>
       </div>
 
-      {/* 2. Choices - Horizontal Swipeable Carousel with Master UI Card Styles */}
-      <div className="relative">
-        
-        {/* Helper text for swipe - fades out */}
-        <div className="absolute -top-8 right-0 text-[10px] text-neutral-soft font-bold uppercase tracking-widest animate-pulse sm:hidden bg-white/40 px-2 py-1 rounded-full">
-          Swipe →
+      {/* 2. Choices */}
+      <div className="flex flex-col gap-3 w-full">
+        <div className="flex items-center justify-between px-1">
+           <span className="text-caption font-bold uppercase text-neutral-soft tracking-widest">
+             {t('select_role') === 'Select your role' ? 'Your Choice' : 'आपका फैसला'}
+           </span>
+           <span className="text-[10px] text-neutral-soft/60 sm:hidden">Swipe →</span>
         </div>
 
-        <div className="flex overflow-x-auto gap-4 py-2 px-1 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide sm:grid sm:grid-cols-1 sm:gap-4 sm:overflow-visible sm:px-0 sm:mx-0">
+        <div className="flex overflow-x-auto gap-4 px-1 pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide sm:grid sm:grid-cols-1 sm:gap-4 sm:overflow-visible sm:px-0 sm:mx-0 sm:pb-0">
           {event.choices.map((choice) => {
             
             // Accent Color determination based on type
@@ -53,14 +54,15 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({ event, onMakeChoice,
                 disabled={isLoading}
                 className={`
                   glass-choice flex-shrink-0 w-[85%] sm:w-full snap-center
-                  rounded-choice p-5 flex flex-row justify-between items-center gap-3
+                  rounded-choice p-5 flex flex-row justify-between items-center gap-4
                   transition-all duration-300 text-left hover:-translate-y-1 hover:shadow-btn-hover shadow-sm group
+                  min-h-[100px] h-auto
                 `}
               >
                 {/* Left Side: Content */}
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 flex flex-col gap-1">
                    {/* Header: Cost + Emoji */}
-                   <div className="flex items-center gap-2 mb-2">
+                   <div className="flex items-center gap-2">
                       <span className={`text-caption font-bold px-2 py-0.5 rounded-md bg-white/50 ${accentColorClass}`}>
                          {choice.cost_label}
                       </span>
@@ -68,7 +70,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({ event, onMakeChoice,
                    </div>
 
                    {/* Main Text */}
-                   <div className="text-h3 text-neutral-dark leading-tight mb-1 truncate whitespace-normal">
+                   <div className="text-h3 text-neutral-dark leading-tight whitespace-normal break-words">
                       {choice.text}
                    </div>
 
@@ -94,7 +96,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({ event, onMakeChoice,
       </div>
       
       {isLoading && (
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center py-4">
            <div className="glass-card px-6 py-3 rounded-full shadow-sm flex items-center gap-2 animate-pulse">
               <div className="w-2 h-2 bg-brand rounded-full animate-bounce"></div>
               <div className="w-2 h-2 bg-brand rounded-full animate-bounce delay-75"></div>
@@ -104,7 +106,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({ event, onMakeChoice,
         </div>
       )}
 
-      <div ref={bottomRef} />
+      <div ref={bottomRef} className="h-4" />
     </div>
   );
 };

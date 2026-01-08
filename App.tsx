@@ -130,11 +130,11 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen text-neutral-dark font-sans">
+    <div className="min-h-screen text-neutral-dark font-sans flex flex-col bg-fixed">
       <Header language={gameState.language} onLanguageChange={handleLanguageChange} />
 
-      {/* Master UI Page Container Rules */}
-      <main className="max-w-[500px] mx-auto pt-24 pb-12 px-4 flex flex-col gap-6">
+      {/* Main Container - Natural Flow, No Overlaps */}
+      <main className="flex-1 w-full max-w-[500px] mx-auto px-4 py-6 flex flex-col gap-6 relative z-0">
         
         {gameState.error && (
           <div className="p-4 bg-accent-red/10 border border-accent-red/20 text-accent-red rounded-card backdrop-blur-sm animate-fade-in text-caption">
@@ -151,11 +151,12 @@ const App: React.FC = () => {
           />
         )}
 
+        {/* Game Loop Container */}
         {(gameState.gameStatus === 'PLAYING' || gameState.gameStatus === 'FEEDBACK') && gameState.currentEvent && (
-          <div className="animate-fade-in flex flex-col gap-6">
+          <div className="flex flex-col gap-6 w-full animate-fade-in">
             <Dashboard state={gameState} />
             
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 w-full">
               {gameState.gameStatus === 'PLAYING' ? (
                 <ScenarioView 
                   event={gameState.currentEvent} 
