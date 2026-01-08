@@ -66,11 +66,12 @@ const responseSchema: Schema = {
         properties: {
           id: { type: Type.STRING },
           text: { type: Type.STRING, description: "Action text (e.g. 'Buy Gold Gift')" },
+          emoji: { type: Type.STRING, description: "Single emoji representing this action" },
           cost_label: { type: Type.STRING, description: "Cost display (e.g. '₹8000' or 'Free')" },
           tag: { type: Type.STRING, description: "Short emotional/financial summary (e.g. 'Loved | Wallet Empty')" },
           type: { type: Type.STRING, enum: ['expensive', 'balanced', 'cheap'] },
         },
-        required: ["id", "text", "cost_label", "tag", "type"],
+        required: ["id", "text", "emoji", "cost_label", "tag", "type"],
       },
     },
     isGameOver: { type: Type.BOOLEAN },

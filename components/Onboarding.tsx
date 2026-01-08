@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { PlayerProfile, OCCUPATIONS, Language } from '../types';
 import { getTranslation } from '../translations';
-import { CheckCircle2, ArrowRight } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 
 interface OnboardingProps {
   onComplete: (profile: PlayerProfile) => void;
@@ -11,7 +11,7 @@ interface OnboardingProps {
 }
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, isLoading, language, setLanguage }) => {
-  const [step, setStep] = useState<1 | 2>(1); // 1: Name, 2: Role
+  const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState('');
   const [selectedOccupation, setSelectedOccupation] = useState<string | null>(null);
 
@@ -34,28 +34,20 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, isLoading, l
   const t = (key: any) => getTranslation(language, key);
 
   return (
-    <div className="max-w-md mx-auto p-6 space-y-6 animate-fade-in glass-panel rounded-[2rem] shadow-glass border border-white/60 mt-4 sm:mt-8">
+    <div className="flex flex-col gap-6 pt-4">
       
-      {/* Welcome Header */}
-      <div className="text-center space-y-2 mb-6">
-        <h2 className="text-3xl font-extrabold text-earth-900 tracking-tight">{t('welcome_title')}</h2>
-        <p className="text-earth-600 text-sm font-medium leading-relaxed px-4">
-          {t('welcome_subtitle')}
-        </p>
-      </div>
-
-      {/* Language Pills (Visible if on step 1) */}
+      {/* Language Selector for Step 1 */}
       {step === 1 && (
-        <div className="flex justify-center gap-2 mb-6">
+        <div className="flex justify-center gap-3">
           {(['en', 'hi', 'hinglish'] as Language[]).map((lang) => (
             <button
               key={lang}
               type="button"
               onClick={() => setLanguage(lang)}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+              className={`px-4 py-2 rounded-full text-caption font-bold uppercase tracking-wider transition-all duration-300 ${
                 language === lang 
-                  ? 'bg-earth-800 text-white shadow-lg scale-105' 
-                  : 'bg-white/50 text-earth-600 hover:bg-earth-100'
+                  ? 'bg-brand text-white shadow-btn' 
+                  : 'bg-white/40 text-neutral-soft hover:bg-white'
               }`}
             >
               {lang === 'en' ? 'English' : lang === 'hi' ? 'हिंदी' : 'Hinglish'}
@@ -64,93 +56,105 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, isLoading, l
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        
-        {/* Step 1: Name */}
-        {step === 1 && (
-          <div className="space-y-4 animate-slide-up">
-            <label htmlFor="name" className="block text-center text-lg font-bold text-earth-800">
-              {t('enter_name')}
-            </label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full p-4 text-center text-xl font-bold border-2 border-transparent bg-white/60 rounded-2xl focus:border-peach-400 focus:bg-white focus:outline-none transition-all shadow-inner text-earth-900 placeholder-earth-300"
-              placeholder="Rahul..."
-              autoFocus
-              required
-            />
-             <button
-              type="submit"
-              disabled={!name}
-              className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all flex items-center justify-center ${
-                !name ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-earth-800 text-white hover:scale-[1.02] hover:bg-earth-900'
-              }`}
-            >
-              Next <ArrowRight className="ml-2 w-5 h-5" />
-            </button>
-          </div>
-        )}
+      <div className="glass-card rounded-[32px] p-8 shadow-glass relative overflow-hidden">
+        {/* Decorative background blobs */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-accent-pink rounded-full blur-[60px] opacity-20 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent-green rounded-full blur-[60px] opacity-20 pointer-events-none"></div>
 
-        {/* Step 2: Role */}
-        {step === 2 && (
-          <div className="space-y-4 animate-slide-up">
-            <span className="block text-center text-lg font-bold text-earth-800">
-              {t('select_role')}
-            </span>
-            <div className="grid grid-cols-1 gap-3">
-              {OCCUPATIONS.map((occ) => (
-                <button
-                  key={occ.id}
-                  type="button"
-                  onClick={() => setSelectedOccupation(occ.id)}
-                  disabled={isLoading}
-                  className={`
-                    relative flex items-center p-4 rounded-xl border-2 transition-all duration-200 text-left
-                    ${selectedOccupation === occ.id 
-                      ? 'border-peach-400 bg-peach-50 shadow-md transform scale-[1.01]' 
-                      : 'border-transparent bg-white/50 hover:bg-white/80 hover:shadow-sm'}
-                  `}
-                >
-                  <span className="text-3xl mr-4">{occ.icon}</span>
-                  <div className="flex-1">
-                    <div className="font-bold text-earth-900 text-lg">
-                      {occ.label[language] || occ.label['en']}
-                    </div>
-                    <div className="text-xs font-semibold text-earth-500">
-                      ₹{occ.baseIncome.toLocaleString()}/mo
-                    </div>
-                  </div>
-                  {selectedOccupation === occ.id && (
-                    <CheckCircle2 className="w-6 h-6 text-peach-500" />
-                  )}
-                </button>
-              ))}
+        {/* Welcome Text */}
+        <div className="text-center space-y-4 mb-8 relative">
+          <div className="inline-flex items-center justify-center p-3 bg-white rounded-2xl shadow-sm">
+            <Sparkles className="w-6 h-6 text-accent-yellow" />
+          </div>
+          <h2 className="text-h1 text-brand tracking-tight">{t('welcome_title')}</h2>
+          <p className="text-body text-neutral-soft leading-relaxed max-w-xs mx-auto">
+            {t('welcome_subtitle')}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="relative flex flex-col gap-6">
+          
+          {/* Step 1: Name Input */}
+          {step === 1 && (
+            <div className="flex flex-col gap-6 animate-fade-in">
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full p-6 text-center text-h2 font-bold bg-white/50 border-2 border-white/50 rounded-card text-brand placeholder-neutral-soft/50 focus:outline-none focus:bg-white focus:border-brand/30 transition-all"
+                placeholder="Your Name..."
+                autoFocus
+                required
+              />
+               
+              <button
+                type="submit"
+                disabled={!name}
+                className={`w-full py-4 rounded-btn font-bold text-body shadow-btn transition-all flex items-center justify-center transform ${
+                  !name 
+                    ? 'bg-neutral-soft/20 text-neutral-soft cursor-not-allowed' 
+                    : 'bg-brand text-white hover:-translate-y-0.5 hover:shadow-btn-hover'
+                }`}
+              >
+                Start Journey <ArrowRight className="ml-2 w-5 h-5" />
+              </button>
             </div>
+          )}
 
-            <button
-              type="submit"
-              disabled={!selectedOccupation || isLoading}
-              className={`
-                w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg transition-all duration-300 mt-4
-                ${!selectedOccupation || isLoading
-                  ? 'bg-earth-300 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-earth-700 to-earth-900 hover:shadow-xl hover:-translate-y-1 active:scale-95'}
-              `}
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center animate-pulse">
-                  {t('loading')}
-                </span>
-              ) : (
-                t('start_button')
-              )}
-            </button>
-          </div>
-        )}
-      </form>
+          {/* Step 2: Role Selection */}
+          {step === 2 && (
+            <div className="flex flex-col gap-6 animate-fade-in">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {OCCUPATIONS.map((occ) => (
+                  <button
+                    key={occ.id}
+                    type="button"
+                    onClick={() => setSelectedOccupation(occ.id)}
+                    disabled={isLoading}
+                    className={`
+                      relative flex flex-col items-start p-4 rounded-card transition-all duration-300 text-left border
+                      ${selectedOccupation === occ.id 
+                        ? 'bg-white border-brand shadow-md ring-1 ring-brand' 
+                        : 'bg-white/40 border-white hover:bg-white/80'}
+                    `}
+                  >
+                    <span className="text-2xl mb-2">{occ.icon}</span>
+                    <div className="w-full">
+                      <div className="font-bold text-brand text-h3 leading-tight">
+                        {occ.label[language] || occ.label['en']}
+                      </div>
+                      <div className="text-caption font-semibold text-neutral-soft uppercase tracking-wider mb-1">
+                        {(occ as any).desc}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="submit"
+                disabled={!selectedOccupation || isLoading}
+                className={`
+                  w-full py-4 rounded-btn font-bold text-body shadow-btn transition-all mt-2
+                  ${!selectedOccupation || isLoading
+                    ? 'bg-neutral-soft/20 text-neutral-soft cursor-not-allowed' 
+                    : 'bg-brand text-white hover:-translate-y-0.5 hover:shadow-btn-hover'}
+                `}
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center animate-pulse">
+                    <Sparkles className="animate-spin -ml-1 mr-2 h-5 w-5" />
+                    {t('loading')}
+                  </span>
+                ) : (
+                  t('start_button')
+                )}
+              </button>
+            </div>
+          )}
+        </form>
+      </div>
     </div>
   );
 };

@@ -109,7 +109,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Called when user clicks "Next Turn" on the Feedback screen
   const handleNextTurn = () => {
     setGameState(prev => {
        // Simple Game Over logic checks
@@ -131,12 +130,14 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen text-earth-900 pb-10 font-sans selection:bg-peach-200">
+    <div className="min-h-screen text-neutral-dark font-sans">
       <Header language={gameState.language} onLanguageChange={handleLanguageChange} />
 
-      <main className="container mx-auto max-w-4xl px-0 sm:px-4">
+      {/* Master UI Page Container Rules */}
+      <main className="max-w-[500px] mx-auto pt-24 pb-12 px-4 flex flex-col gap-6">
+        
         {gameState.error && (
-          <div className="p-4 mx-4 mt-4 bg-debt-50/80 border border-debt-200 text-debt-800 rounded-2xl backdrop-blur-sm shadow-sm animate-fade-in">
+          <div className="p-4 bg-accent-red/10 border border-accent-red/20 text-accent-red rounded-card backdrop-blur-sm animate-fade-in text-caption">
             {gameState.error}
           </div>
         )}
@@ -151,10 +152,10 @@ const App: React.FC = () => {
         )}
 
         {(gameState.gameStatus === 'PLAYING' || gameState.gameStatus === 'FEEDBACK') && gameState.currentEvent && (
-          <div className="animate-fade-in">
+          <div className="animate-fade-in flex flex-col gap-6">
             <Dashboard state={gameState} />
             
-            <div className="mt-4 sm:mt-8">
+            <div className="flex flex-col gap-6">
               {gameState.gameStatus === 'PLAYING' ? (
                 <ScenarioView 
                   event={gameState.currentEvent} 
@@ -176,9 +177,7 @@ const App: React.FC = () => {
         )}
 
         {gameState.gameStatus === 'ENDED' && (
-          <div className="mt-12">
-             <GameOver state={gameState} onRestart={handleRestart} />
-          </div>
+          <GameOver state={gameState} onRestart={handleRestart} />
         )}
       </main>
     </div>

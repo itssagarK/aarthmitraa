@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { GameState, Choice, GameEvent } from '../types';
 import { getTranslation } from '../translations';
-import { ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface ScenarioViewProps {
   event: GameEvent;
@@ -20,77 +20,87 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({ event, onMakeChoice,
   }, [event]);
 
   return (
-    <div className="max-w-md mx-auto px-4 pb-24 space-y-6">
+    <div className="flex flex-col gap-6 pb-24">
       
-      {/* 1. Story Hook */}
-      <div className="relative mt-2">
-        <div className="absolute -left-2 -top-2 text-4xl opacity-20">❝</div>
-        <p className="text-2xl font-medium text-earth-900 leading-tight pl-2">
+      {/* 1. Story Card */}
+      <div className="glass-card p-5 rounded-card text-center sm:text-left">
+        <p className="text-h2 text-brand leading-snug">
           {event.narrative_hook}
         </p>
       </div>
 
-      {/* 2. Choices */}
-      <div className="space-y-3 pt-4">
-        {event.choices.map((choice) => {
-          
-          // Determine Style based on type
-          let bgClass = "bg-white/70 border-white";
-          let accentClass = "bg-earth-100 text-earth-700";
-          
-          if (choice.type === 'expensive') {
-             bgClass = "bg-peach-50/60 border-peach-100";
-             accentClass = "bg-peach-100 text-peach-800";
-          } else if (choice.type === 'cheap') {
-             bgClass = "bg-growth-50/60 border-growth-100";
-             accentClass = "bg-growth-100 text-growth-800";
-          }
+      {/* 2. Choices - Horizontal Swipeable Carousel with Master UI Card Styles */}
+      <div className="relative">
+        
+        {/* Helper text for swipe - fades out */}
+        <div className="absolute -top-8 right-0 text-[10px] text-neutral-soft font-bold uppercase tracking-widest animate-pulse sm:hidden bg-white/40 px-2 py-1 rounded-full">
+          Swipe →
+        </div>
 
-          return (
-            <button
-              key={choice.id}
-              onClick={() => onMakeChoice(choice)}
-              disabled={isLoading}
-              className={`
-                group w-full relative overflow-hidden rounded-2xl p-4 border transition-all duration-300 text-left shadow-sm hover:shadow-lg hover:-translate-y-1
-                ${bgClass} hover:bg-white
-              `}
-            >
-              <div className="flex justify-between items-start mb-1">
-                 {/* Option ID circle */}
-                 <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2 ${accentClass}`}>
-                   {choice.id.slice(-1)}
-                 </div>
-                 
-                 {/* Cost Badge */}
-                 <div className={`text-sm font-bold px-2 py-0.5 rounded-md ${accentClass}`}>
-                    {choice.cost_label}
-                 </div>
-              </div>
+        <div className="flex overflow-x-auto gap-4 py-2 px-1 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide sm:grid sm:grid-cols-1 sm:gap-4 sm:overflow-visible sm:px-0 sm:mx-0">
+          {event.choices.map((choice) => {
+            
+            // Accent Color determination based on type
+            let accentColorClass = "text-brand";
+            if (choice.type === 'expensive') accentColorClass = "text-accent-red";
+            else if (choice.type === 'cheap') accentColorClass = "text-accent-green";
+            else accentColorClass = "text-brand";
 
-              <div className="pl-8">
-                <div className="text-lg font-bold text-earth-900 leading-tight mb-1 group-hover:text-earth-700">
-                  {choice.text}
+            return (
+              <button
+                key={choice.id}
+                onClick={() => onMakeChoice(choice)}
+                disabled={isLoading}
+                className={`
+                  glass-choice flex-shrink-0 w-[85%] sm:w-full snap-center
+                  rounded-choice p-5 flex flex-row justify-between items-center gap-3
+                  transition-all duration-300 text-left hover:-translate-y-1 hover:shadow-btn-hover shadow-sm group
+                `}
+              >
+                {/* Left Side: Content */}
+                <div className="flex-1 min-w-0">
+                   {/* Header: Cost + Emoji */}
+                   <div className="flex items-center gap-2 mb-2">
+                      <span className={`text-caption font-bold px-2 py-0.5 rounded-md bg-white/50 ${accentColorClass}`}>
+                         {choice.cost_label}
+                      </span>
+                      {choice.emoji && <span className="text-lg">{choice.emoji}</span>}
+                   </div>
+
+                   {/* Main Text */}
+                   <div className="text-h3 text-neutral-dark leading-tight mb-1 truncate whitespace-normal">
+                      {choice.text}
+                   </div>
+
+                   {/* Tag / Subtext */}
+                   {choice.tag && (
+                    <div className="text-caption text-neutral-soft font-medium">
+                      {choice.tag}
+                    </div>
+                   )}
                 </div>
-                {choice.tag && (
-                  <div className="text-xs font-semibold text-earth-500 uppercase tracking-wide opacity-80">
-                    {choice.tag}
-                  </div>
-                )}
-              </div>
-
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <ChevronRight className="w-5 h-5 text-earth-400" />
-              </div>
-            </button>
-          );
-        })}
+                
+                {/* Right Side: CTA Button Icon */}
+                <div className="w-10 h-10 rounded-full bg-brand text-white flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-110 transition-transform">
+                    <ArrowRight className="w-5 h-5" />
+                </div>
+              </button>
+            );
+          })}
+          
+           {/* Spacer for horizontal scroll padding on mobile */}
+           <div className="w-1 flex-shrink-0 sm:hidden"></div>
+        </div>
       </div>
       
       {isLoading && (
-        <div className="flex flex-col items-center justify-center py-10 space-y-4 animate-pulse">
-           <div className="w-12 h-12 rounded-full border-4 border-earth-200 border-t-earth-800 animate-spin"></div>
-           <div className="text-earth-600 text-sm font-bold tracking-widest uppercase">{t('loading')}</div>
+        <div className="flex justify-center mt-4">
+           <div className="glass-card px-6 py-3 rounded-full shadow-sm flex items-center gap-2 animate-pulse">
+              <div className="w-2 h-2 bg-brand rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-brand rounded-full animate-bounce delay-75"></div>
+              <div className="w-2 h-2 bg-brand rounded-full animate-bounce delay-150"></div>
+              <span className="text-caption font-bold uppercase tracking-widest text-neutral-soft">{t('loading')}</span>
+           </div>
         </div>
       )}
 

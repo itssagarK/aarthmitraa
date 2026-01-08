@@ -9,6 +9,7 @@ export interface PlayerProfile {
 export interface Choice {
   id: string;
   text: string; // The main action text
+  emoji?: string; // Visual icon
   cost_label?: string; // e.g., "₹8000"
   tag?: string; // e.g., "Loved | Wallet empty"
   type: 'expensive' | 'balanced' | 'cheap'; // For color coding
@@ -56,8 +57,8 @@ export interface GameState {
 }
 
 export const OCCUPATIONS = [
-  { id: 'Farmer', label: { en: 'Farmer', hi: 'किसान', hinglish: 'Kisan' }, icon: '🌾', baseIncome: 15000, baseSavings: 20000 },
-  { id: 'Shopkeeper', label: { en: 'Shopkeeper', hi: 'दुकानदार', hinglish: 'Dukandaar' }, icon: '🏪', baseIncome: 20000, baseSavings: 50000 },
-  { id: 'Worker', label: { en: 'Daily Worker', hi: 'मज़दूर', hinglish: 'Worker' }, icon: '🔨', baseIncome: 12000, baseSavings: 5000 },
-  { id: 'Student', label: { en: 'Student', hi: 'छात्र', hinglish: 'Student' }, icon: '📚', baseIncome: 3000, baseSavings: 2000 },
+  { id: 'Farmer', label: { en: 'Farmer', hi: 'किसान', hinglish: 'Kisan' }, icon: '🌾', desc: 'Connected to earth', baseIncome: 15000, baseSavings: 20000 },
+  { id: 'Shopkeeper', label: { en: 'Shopkeeper', hi: 'दुकानदार', hinglish: 'Dukandaar' }, icon: '🏪', desc: 'Heart of the market', baseIncome: 20000, baseSavings: 50000 },
+  { id: 'Worker', label: { en: 'Daily Worker', hi: 'मज़दूर', hinglish: 'Worker' }, icon: '🔨', desc: 'Building dreams', baseIncome: 12000, baseSavings: 5000 },
+  { id: 'Student', label: { en: 'Student', hi: 'छात्र', hinglish: 'Student' }, icon: '📚', desc: 'Future leader', baseIncome: 3000, baseSavings: 2000 },
 ] as const;

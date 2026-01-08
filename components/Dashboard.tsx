@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GameState } from '../types';
 import { getTranslation } from '../translations';
 import { IndianRupee, Heart, Smile, TrendingDown, TrendingUp } from 'lucide-react';
@@ -7,55 +7,104 @@ interface DashboardProps {
   state: GameState;
 }
 
+const AnimatedCounter = ({ value, formatter }: { value: number, formatter?: (v: number) => string | number }) => {
+  const [displayValue, setDisplayValue] = useState(value);
+  const startTime = useRef<number>(0);
+  const startValue = useRef<number>(value);
+  const rafId = useRef<number | null>(null);
+
+  useEffect(() => {
+    startValue.current = displayValue;
+    startTime.current = 0;
+    
+    const animate = (timestamp: number) => {
+      if (!startTime.current) startTime.current = timestamp;
+      const progress = timestamp - startTime.current;
+      const duration = 1500;
+      
+      if (progress < duration) {
+        const ease = 1 - Math.pow(2, -10 * (progress / duration));
+        const nextValue = startValue.current + (value - startValue.current) * ease;
+        setDisplayValue(nextValue);
+        rafId.current = requestAnimationFrame(animate);
+      } else {
+        setDisplayValue(value);
+      }
+    };
+    
+    rafId.current = requestAnimationFrame(animate);
+    return () => { if (rafId.current) cancelAnimationFrame(rafId.current); };
+  }, [value]);
+
+  return <>{formatter ? formatter(displayValue) : Math.round(displayValue)}</>;
+};
+
 export const Dashboard: React.FC<DashboardProps> = ({ state }) => {
   const t = (key: any) => getTranslation(state.language, key);
 
+  const savingsFormatter = (val: number) => {
+    if (val > -1000 && val < 1000) return Math.round(val);
+    return `${(val / 1000).toFixed(1)}k`;
+  };
+
+  const debtFormatter = (val: number) => {
+    if (Math.round(val) <= 0) return '-';
+    return `${(val / 1000).toFixed(1)}k`;
+  };
+
+  const percentageFormatter = (val: number) => {
+    return `${Math.round(val)}%`;
+  };
+
+  // Master UI Stat Chip Styles
+  const statChipClass = "flex flex-col items-center justify-center p-3 rounded-chip min-w-[90px] min-h-[70px] bg-neutral-glass backdrop-blur-md border border-white/40 shadow-sm transition-transform hover:-translate-y-1";
+
   return (
-    <div className="sticky top-[70px] z-40 my-4 px-4 sm:px-0">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="sticky top-[72px] z-40 -mx-4 px-4 overflow-x-auto scrollbar-hide">
+      <div className="flex gap-3 pb-2 w-max mx-auto sm:w-full sm:mx-0">
         
-        {/* Savings Chip */}
-        <div className="bg-white/80 backdrop-blur-md rounded-2xl p-3 border border-white/50 shadow-glass flex flex-col items-center justify-center relative overflow-hidden group hover:-translate-y-1 transition-transform">
-          <div className="absolute top-0 left-0 w-full h-1 bg-growth-500"></div>
-          <span className="text-[10px] font-bold uppercase text-growth-700 tracking-widest mb-1">{t('savings')}</span>
-          <div className="flex items-center space-x-1">
-             <IndianRupee className="w-4 h-4 text-growth-600" />
-             <span className="text-xl font-extrabold text-earth-900 tracking-tight">
-               {state.savings < 1000 && state.savings > -1000 ? state.savings : `${(state.savings/1000).toFixed(1)}k`}
-             </span>
+        {/* Savings Bubble */}
+        <div className={`${statChipClass} group`}>
+          <div className="flex items-center gap-1 mb-1 text-accent-green">
+             <IndianRupee className="w-4 h-4" strokeWidth={2.5} />
           </div>
+          <span className="text-[10px] font-bold uppercase text-neutral-soft tracking-wider">{t('savings')}</span>
+          <span className="text-h3 text-neutral-dark mt-0.5">
+             <AnimatedCounter value={state.savings} formatter={savingsFormatter} />
+          </span>
         </div>
 
-        {/* Debt Chip */}
-        <div className="bg-white/80 backdrop-blur-md rounded-2xl p-3 border border-white/50 shadow-glass flex flex-col items-center justify-center relative overflow-hidden group hover:-translate-y-1 transition-transform">
-          <div className={`absolute top-0 left-0 w-full h-1 ${state.debt > 0 ? 'bg-debt-500' : 'bg-gray-300'}`}></div>
-          <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${state.debt > 0 ? 'text-debt-600' : 'text-gray-500'}`}>{t('debt')}</span>
-           <div className="flex items-center space-x-1">
-             {state.debt > 0 && <TrendingDown className="w-4 h-4 text-debt-500" />}
-             <span className={`text-xl font-extrabold tracking-tight ${state.debt > 0 ? 'text-debt-800' : 'text-gray-400'}`}>
-               {state.debt === 0 ? '-' : `${(state.debt/1000).toFixed(1)}k`}
-             </span>
-          </div>
-        </div>
-
-        {/* Happiness Chip */}
-        <div className="bg-white/80 backdrop-blur-md rounded-2xl p-3 border border-white/50 shadow-glass flex flex-col items-center justify-center relative overflow-hidden group hover:-translate-y-1 transition-transform">
-           <div className="absolute top-0 left-0 w-full h-1 bg-peach-500"></div>
-           <span className="text-[10px] font-bold uppercase text-peach-600 tracking-widest mb-1">{t('happiness')}</span>
-           <div className="flex items-center space-x-2">
-             <Smile className="w-5 h-5 text-peach-500" />
-             <span className="text-xl font-extrabold text-earth-900">{state.happiness}</span>
+        {/* Debt Bubble */}
+        <div className={`${statChipClass} group`}>
+           <div className={`flex items-center gap-1 mb-1 ${state.debt > 0 ? 'text-accent-red' : 'text-neutral-soft'}`}>
+             {state.debt > 0 ? <TrendingDown className="w-4 h-4" strokeWidth={2.5} /> : <TrendingUp className="w-4 h-4" strokeWidth={2.5} />}
            </div>
+           <span className="text-[10px] font-bold uppercase text-neutral-soft tracking-wider">{t('debt')}</span>
+           <span className="text-h3 text-neutral-dark mt-0.5">
+              <AnimatedCounter value={state.debt} formatter={debtFormatter} />
+           </span>
         </div>
 
-        {/* Health Chip */}
-        <div className="bg-white/80 backdrop-blur-md rounded-2xl p-3 border border-white/50 shadow-glass flex flex-col items-center justify-center relative overflow-hidden group hover:-translate-y-1 transition-transform">
-           <div className="absolute top-0 left-0 w-full h-1 bg-warmTeal-500"></div>
-           <span className="text-[10px] font-bold uppercase text-warmTeal-600 tracking-widest mb-1">{t('health')}</span>
-           <div className="flex items-center space-x-2">
-             <Heart className="w-5 h-5 text-warmTeal-500 fill-warmTeal-500" />
-             <span className="text-xl font-extrabold text-earth-900">{state.health}</span>
+        {/* Joy Bubble */}
+        <div className={`${statChipClass} group`}>
+           <div className="flex items-center gap-1 mb-1 text-accent-yellow">
+              <Smile className="w-4 h-4" strokeWidth={2.5} />
            </div>
+           <span className="text-[10px] font-bold uppercase text-neutral-soft tracking-wider">{t('happiness')}</span>
+           <span className="text-h3 text-neutral-dark mt-0.5">
+             <AnimatedCounter value={state.happiness} formatter={percentageFormatter} />
+           </span>
+        </div>
+
+        {/* Health Bubble */}
+        <div className={`${statChipClass} group`}>
+           <div className="flex items-center gap-1 mb-1 text-accent-pink">
+              <Heart className="w-4 h-4 fill-current" />
+           </div>
+           <span className="text-[10px] font-bold uppercase text-neutral-soft tracking-wider">{t('health')}</span>
+           <span className="text-h3 text-neutral-dark mt-0.5">
+             <AnimatedCounter value={state.health} formatter={percentageFormatter} />
+           </span>
         </div>
 
       </div>

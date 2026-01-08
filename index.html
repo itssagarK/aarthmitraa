@@ -11,58 +11,60 @@
         theme: {
           extend: {
             colors: {
-              earth: {
-                50: '#fdf8f6',
-                100: '#f2e8e5',
-                200: '#eaddd7',
-                300: '#e0cec7',
-                500: '#a67c52',
-                600: '#8c6239',
-                800: '#5c4026',
-                900: '#3d2b1a',
+              brand: {
+                DEFAULT: '#6C4F3D', // Warm Brown
+                light: '#8C6B56',
+                dark: '#4A3427',
               },
-              sand: {
-                50: '#fbfaf8',
-                100: '#f5f2eb',
-                200: '#ebe4d6',
-                300: '#ded0b8',
+              accent: {
+                green: '#00A676',
+                red: '#E25B5B',
+                yellow: '#FFC93C',
+                pink: '#FF8FA3',
+              },
+              neutral: {
+                dark: '#262626',
+                soft: '#666666',
+                glass: 'rgba(255, 255, 255, 0.55)',
+              },
+              mint: {
+                50: '#f0fdf9',
+                100: '#ccfbf1',
               },
               peach: {
                 50: '#fff5f2',
-                100: '#ffe8e0',
-                200: '#ffd0c2',
-                300: '#ffb39e',
-                500: '#fa8c70',
-              },
-              warmTeal: {
-                50: '#f0fdfa',
-                100: '#ccfbf1',
-                200: '#99f6e4',
-                500: '#14b8a6',
-                700: '#0f766e',
-                900: '#134e4a',
-              },
-              growth: {
-                50: '#f0fdf4',
-                100: '#dcfce7',
-                500: '#22c55e',
-                600: '#16a34a',
-                700: '#15803d',
-              },
-              debt: {
-                50: '#fef2f2',
-                100: '#fee2e2',
-                500: '#ef4444',
-                600: '#dc2626',
-                700: '#b91c1c',
+                100: '#ffe4e6',
               }
             },
             fontFamily: {
               sans: ['Outfit', 'sans-serif'],
             },
+            fontSize: {
+              'h1': ['28px', { lineHeight: '1.35', fontWeight: '700' }],
+              'h2': ['22px', { lineHeight: '1.35', fontWeight: '700' }],
+              'h3': ['18px', { lineHeight: '1.35', fontWeight: '600' }],
+              'body': ['16px', { lineHeight: '1.35', fontWeight: '400' }],
+              'caption': ['13px', { lineHeight: '1.35', fontWeight: '500' }],
+            },
+            borderRadius: {
+              'card': '24px',
+              'choice': '22px',
+              'chip': '18px',
+              'btn': '24px',
+            },
             boxShadow: {
-              'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
-              'glass-hover': '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+              'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.05)',
+              'btn': '0 4px 14px rgba(0,0,0,0.12)',
+              'btn-hover': '0 8px 18px rgba(0,0,0,0.16)',
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
             }
           },
         },
@@ -72,30 +74,31 @@
     <style>
       body { 
         font-family: 'Outfit', sans-serif; 
-        background-color: #fbfaf8;
-        background-image: 
-          radial-gradient(at 0% 0%, rgba(255, 208, 194, 0.4) 0px, transparent 50%),
-          radial-gradient(at 100% 0%, rgba(153, 246, 228, 0.4) 0px, transparent 50%),
-          radial-gradient(at 100% 100%, rgba(222, 208, 184, 0.4) 0px, transparent 50%);
+        color: #262626;
+        background-color: #f0fdf9;
+        background-image: linear-gradient(135deg, #f0fdf9 0%, #fff5f2 100%);
         background-attachment: fixed;
-      }
-      /* Custom scrollbar */
-      ::-webkit-scrollbar { width: 6px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: rgba(166, 124, 82, 0.3); border-radius: 3px; }
-      ::-webkit-scrollbar-thumb:hover { background: rgba(166, 124, 82, 0.6); }
-      
-      .glass-panel {
-        background: rgba(255, 255, 255, 0.4);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.6);
+        min-height: 100vh;
       }
       
-      .glass-card-hover:hover {
+      /* Master UI Surfaces */
+      .glass-card {
+        background: rgba(255, 255, 255, 0.55);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+      }
+
+      .glass-choice {
         background: rgba(255, 255, 255, 0.65);
-        transform: translateY(-2px);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
       }
+
+      /* Scrollbar utilities */
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
   <script type="importmap">
 {
