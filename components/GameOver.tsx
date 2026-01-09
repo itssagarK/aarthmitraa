@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { GameState } from '../types';
 import { getTranslation } from '../translations';
 import { RefreshCcw, Trophy, AlertTriangle } from 'lucide-react';
+import { playSound } from '../services/audioService';
 
 interface GameOverProps {
   state: GameState;
@@ -9,8 +10,24 @@ interface GameOverProps {
 }
 
 export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
-  const isWin = state.happiness > 0 && state.health > 0 && state.savings > -10000;
+  // Win condition: Positive happiness/health and manageable debt (<= 50k).
+  // Savings are normalized to always be >= 0, so no explicit check needed unless we want a minimum threshold.
+  const isWin = state.happiness > 0 && state.health > 0 && state.debt <= 50000;
+  
+  useEffect(() => {
+    if (isWin) {
+      playSound('win');
+    } else {
+      playSound('lose');
+    }
+  }, [isWin]);
+
   const t = (key: any) => getTranslation(state.language, key);
+
+  const handleRestartClick = () => {
+    playSound('click');
+    onRestart();
+  };
   
   return (
     <div className="flex flex-col gap-8 text-center animate-fade-in pb-12 glass-card rounded-[32px] p-8">
@@ -40,7 +57,9 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
         </div>
         <div className="p-2">
           <div className="text-caption text-neutral-soft uppercase tracking-widest font-bold mb-1">{t('debt')}</div>
-          <div className="text-h3 font-bold text-neutral-dark">₹{state.debt.toLocaleString()}</div>
+          <div className={`text-h3 font-bold ${state.debt > 50000 ? 'text-accent-red' : 'text-neutral-dark'}`}>
+            ₹{state.debt.toLocaleString()}
+          </div>
         </div>
         <div className="p-2">
           <div className="text-caption text-neutral-soft uppercase tracking-widest font-bold mb-1">{t('happiness')}</div>
@@ -53,7 +72,7 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
       </div>
 
       <button
-        onClick={onRestart}
+        onClick={handleRestartClick}
         className="w-full inline-flex items-center justify-center px-10 py-4 bg-brand text-white rounded-btn font-bold text-body hover:shadow-btn-hover transition-all transform hover:-translate-y-0.5"
       >
         <RefreshCcw className="w-5 h-5 mr-3" />

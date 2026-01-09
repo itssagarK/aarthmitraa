@@ -43,6 +43,10 @@ const responseSchema: Schema = {
       type: Type.STRING,
       description: "1-sentence explanation of the result. (e.g., 'Mom is happy, but your pockets are empty.')",
     },
+    financial_explanation: {
+      type: Type.STRING,
+      description: "One strict sentence explaining money flow. Format: '[Amount] [Source] -> [Destination]'. Example: '₹5000 from Savings paid for School Fees' or '₹2000 Bonus added to Savings'.",
+    },
     impact_on_stats: {
       type: Type.OBJECT,
       properties: {
@@ -76,7 +80,7 @@ const responseSchema: Schema = {
     },
     isGameOver: { type: Type.BOOLEAN },
   },
-  required: ["narrative_hook", "choices", "impact_on_stats", "isGameOver"],
+  required: ["narrative_hook", "choices", "impact_on_stats", "isGameOver", "financial_explanation"],
 };
 
 export const startSimulation = async (profile: PlayerProfile, lang: Language) => {
@@ -89,7 +93,7 @@ export const startSimulation = async (profile: PlayerProfile, lang: Language) =>
     
     1. Introduce the first situation (narrative_hook).
     2. Provide 3 choices.
-    3. Since it's the start, 'previous_outcome_title' and 'impact_on_stats' should be empty/zero.
+    3. Since it's the start, 'previous_outcome_title', 'previous_outcome_desc', 'financial_explanation' should be empty string, and 'impact_on_stats' values should be 0.
   `;
 
   try {
@@ -115,7 +119,8 @@ export const startSimulation = async (profile: PlayerProfile, lang: Language) =>
 export const nextTurn = async (
   currentState: GameState,
   choiceId: string,
-  choiceText: string
+  choiceText: string,
+  choiceCostLabel?: string
 ) => {
   const langInstruction = getLangContext(currentState.language);
 
@@ -129,14 +134,15 @@ export const nextTurn = async (
     - Health: ${currentState.health}
     - Turn: ${currentState.turn}
 
-    Player Action: "${choiceText}".
+    Player Action: "${choiceText}" (Cost/Label: ${choiceCostLabel || 'N/A'}).
     Previous Scenario: "${currentState.currentEvent?.narrative_hook}".
 
     1. Calculate IMPACT of this action (Feedback).
-    2. Generate 'previous_outcome_title' (e.g. "Great job!", "Risky!", "Family is sad").
-    3. Generate 'previous_outcome_desc'.
-    4. Create the NEXT Situation ('narrative_hook') - Make it different from the last one.
-    5. Provide 3 new choices.
+    2. Generate 'financial_explanation': BE SPECIFIC. Where did the money come from? Where did it go?
+    3. Generate 'previous_outcome_title' (e.g. "Great job!", "Risky!", "Family is sad").
+    4. Generate 'previous_outcome_desc'.
+    5. Create the NEXT Situation ('narrative_hook') - Make it different from the last one.
+    6. Provide 3 new choices.
   `;
 
   try {

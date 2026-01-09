@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Header } from './components/Header';
 import { Onboarding } from './components/Onboarding';
 import { Dashboard } from './components/Dashboard';
@@ -7,6 +7,77 @@ import { FeedbackView } from './components/FeedbackView';
 import { GameOver } from './components/GameOver';
 import { GameState, PlayerProfile, Choice, Language, OCCUPATIONS } from './types';
 import { startSimulation, nextTurn } from './services/geminiService';
+import { Lightbulb } from 'lucide-react';
+
+// --- TIP DATA & LOGIC ---
+
+const TIP_DATABASE = {
+  high_debt: {
+    en: "Debt eats your future. Pay off high-interest loans before spending on luxury.",
+    hi: "कर्ज आपके भविष्य को खा जाता है। शौक पूरा करने से पहले कर्ज चुकाएं।",
+    hinglish: "Udhaar future kha jaata hai. Luxury se pehle high-interest loan chukao."
+  },
+  low_health: {
+    en: "Health is your true wealth. You cannot earn if you are sick.",
+    hi: "सेहत ही असली दौलत है। अगर आप बीमार हैं तो कमा नहीं सकते।",
+    hinglish: "Health hi asli wealth hai. Bimaar rahoge toh kamaoge kaise?"
+  },
+  low_savings: {
+    en: "Start small. Even ₹10 saved daily builds a shield against bad days.",
+    hi: "छोटी शुरुआत करें। रोज ₹10 बचाने से भी बुरे वक्त में मदद मिलती है।",
+    hinglish: "Choti shuruwat karo. Roz ₹10 bachana bhi bure waqt mein kaam aata hai."
+  },
+  Farmer: {
+    en: "Don't rely on just one crop. Diversification is nature's insurance.",
+    hi: "सिर्फ एक फसल पर निर्भर न रहें। विविधता ही प्रकृति का बीमा है।",
+    hinglish: "Sirf ek crop par depend mat raho. Alag-alag fasal lagana hi safety hai."
+  },
+  Shopkeeper: {
+    en: "Never mix shop cash with household expense money. Keep two wallets.",
+    hi: "दुकान के गल्ले को घर के खर्च से न मिलाएं। दो अलग पर्स रखें।",
+    hinglish: "Shop ke galle ko ghar ke kharche se mix mat karo. Do alag wallet rakho."
+  },
+  Student: {
+    en: "Degrees get interviews, but skills get jobs. Keep learning new things.",
+    hi: "डिग्री से इंटरव्यू मिलता है, लेकिन हुनर से नौकरी। नई चीजें सीखते रहें।",
+    hinglish: "Degree se interview milta hai, par skills se job. Nayi cheezein seekhte raho."
+  },
+  Worker: {
+    en: "Your body is your biggest asset. Don't skip meals to save money.",
+    hi: "आपका शरीर ही आपकी सबसे बड़ी पूंजी है। पैसे बचाने के लिए खाना न छोड़ें।",
+    hinglish: "Body hi aapka asset hai. Paise bachane ke chakkar mein khana mat skip karo."
+  },
+  default: {
+    en: "Money is a tool, not a master. Control it before it controls you.",
+    hi: "पैसा एक औजार है, मालिक नहीं। इसे काबू में रखें वरना यह आपको काबू कर लेगा।",
+    hinglish: "Paisa ek tool hai, master nahi. Isse control karo warna ye tumhe control karega."
+  }
+};
+
+const getContextualTip = (state: GameState): string => {
+  const { debt, health, savings, profile, language } = state;
+  
+  let tipKey: keyof typeof TIP_DATABASE = 'default';
+
+  // Priority 1: Critical Stats
+  if (debt > 25000) {
+    tipKey = 'high_debt';
+  } else if (health < 40) {
+    tipKey = 'low_health';
+  } else if (savings < 2000) {
+    tipKey = 'low_savings';
+  } 
+  // Priority 2: Role Specific
+  else if (profile?.occupation && TIP_DATABASE[profile.occupation as keyof typeof TIP_DATABASE]) {
+    tipKey = profile.occupation as keyof typeof TIP_DATABASE;
+  }
+
+  const tipObj = TIP_DATABASE[tipKey] || TIP_DATABASE['default'];
+  return tipObj[language] || tipObj['en'];
+};
+
+
+// --- MAIN APP COMPONENT ---
 
 // Default initial state
 const initialState: GameState = {
@@ -18,6 +89,7 @@ const initialState: GameState = {
   health: 80,
   turn: 1,
   history: [],
+  statHistory: [],
   currentEvent: null,
   lastEventData: null,
   isLoading: false,
@@ -66,21 +138,53 @@ const App: React.FC = () => {
 
     try {
       // 1. Get AI Response (Impact + Next Turn)
-      const resultData = await nextTurn(gameState, choice.id, choice.text);
+      const resultData = await nextTurn(gameState, choice.id, choice.text, choice.cost_label);
       
       const impacts = resultData.impact_on_stats;
       
-      // 2. Update Stats temporarily but hold off on showing next scenario
-      // We show the Feedback view first using the data from resultData (previous_outcome_*)
+      // 2. Update Stats
       setGameState(prev => {
-        const newSavings = prev.savings + impacts.savings;
-        const newDebt = prev.debt + impacts.debt;
-        let newHappiness = prev.happiness + impacts.happiness;
-        let newHealth = prev.health + (impacts.health || 0);
+        const impactSavings = Number(impacts.savings) || 0;
+        const impactDebt = Number(impacts.debt) || 0;
+        const impactHappiness = Number(impacts.happiness) || 0;
+        const impactHealth = Number(impacts.health) || 0;
+
+        let newSavings = prev.savings + impactSavings;
+        let newDebt = prev.debt + impactDebt;
         
-        // Cap stats 0-100
+        // Smart Balance Normalization
+        if (newSavings < 0) {
+          newDebt += Math.abs(newSavings);
+          newSavings = 0;
+        }
+        
+        if (newDebt < 0) {
+          newSavings += Math.abs(newDebt);
+          newDebt = 0;
+        }
+
+        let newHappiness = prev.happiness + impactHappiness;
+        let newHealth = prev.health + impactHealth;
+        
         newHappiness = Math.min(100, Math.max(0, newHappiness));
         newHealth = Math.min(100, Math.max(0, newHealth));
+
+        // 3. Record history
+        const actualChangeSavings = newSavings - prev.savings;
+        const actualChangeDebt = newDebt - prev.debt;
+        const actualChangeHappiness = newHappiness - prev.happiness;
+        const actualChangeHealth = newHealth - prev.health;
+
+        const newTransaction = {
+          turn: prev.turn,
+          description: choice.text,
+          changes: {
+            savings: actualChangeSavings,
+            debt: actualChangeDebt,
+            happiness: actualChangeHappiness,
+            health: actualChangeHealth
+          }
+        };
 
         return {
           ...prev,
@@ -90,13 +194,10 @@ const App: React.FC = () => {
           happiness: newHappiness,
           health: newHealth,
           turn: prev.turn + 1,
-          
-          // Store the FULL result data to show in Feedback view
+          statHistory: [...prev.statHistory, newTransaction],
           lastEventData: resultData, 
-          // Don't update currentEvent yet (narrative hook), wait for user to click Next
           currentEvent: resultData, 
-          
-          gameStatus: 'FEEDBACK' // Switch to Feedback mode
+          gameStatus: 'FEEDBACK'
         };
       });
 
@@ -111,12 +212,12 @@ const App: React.FC = () => {
 
   const handleNextTurn = () => {
     setGameState(prev => {
-       // Simple Game Over logic checks
-       const isBankrupt = prev.savings < -10000;
        const isDepressed = prev.happiness <= 0;
        const isSick = prev.health <= 0;
+       const isHighDebt = prev.debt > 50000;
        const isMaxTurns = prev.turn >= 12;
-       const isGameOver = isBankrupt || isDepressed || isSick || isMaxTurns || prev.lastEventData?.isGameOver;
+       
+       const isGameOver = isDepressed || isSick || isHighDebt || isMaxTurns || prev.lastEventData?.isGameOver;
 
        return {
          ...prev,
@@ -129,57 +230,105 @@ const App: React.FC = () => {
     setGameState(initialState);
   };
 
+  // Get current tip based on state
+  const currentTip = useMemo(() => getContextualTip(gameState), [
+    gameState.debt, 
+    gameState.health, 
+    gameState.savings, 
+    gameState.profile?.occupation, 
+    gameState.language,
+    gameState.turn // Update tip every turn
+  ]);
+
   return (
-    <div className="min-h-screen text-neutral-dark font-sans flex flex-col bg-fixed">
-      <Header language={gameState.language} onLanguageChange={handleLanguageChange} />
+    // Outer Layout: Full height, flex column, hidden overflow
+    <div className="h-full w-full flex flex-col bg-[#f0fdf9] text-neutral-dark font-sans overflow-hidden relative">
+      
+      {/* Background Gradient Layer */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#f0fdf9] to-[#fff5f2] pointer-events-none" />
 
-      {/* Main Container - Natural Flow, No Overlaps */}
-      <main className="flex-1 w-full max-w-[500px] mx-auto px-4 py-6 flex flex-col gap-6 relative z-0">
-        
-        {gameState.error && (
-          <div className="p-4 bg-accent-red/10 border border-accent-red/20 text-accent-red rounded-card backdrop-blur-sm animate-fade-in text-caption">
-            {gameState.error}
-          </div>
-        )}
+      {/* Header: Static, safe from overlap */}
+      <div className="relative z-50 flex-none border-b border-white/20 shadow-sm bg-white/40 backdrop-blur-md">
+        <Header language={gameState.language} onLanguageChange={handleLanguageChange} />
+      </div>
 
-        {gameState.gameStatus === 'ONBOARDING' && (
-          <Onboarding 
-            onComplete={handleStartGame} 
-            isLoading={gameState.isLoading} 
-            language={gameState.language}
-            setLanguage={handleLanguageChange}
-          />
-        )}
-
-        {/* Game Loop Container */}
-        {(gameState.gameStatus === 'PLAYING' || gameState.gameStatus === 'FEEDBACK') && gameState.currentEvent && (
-          <div className="flex flex-col gap-6 w-full animate-fade-in">
-            <Dashboard state={gameState} />
-            
-            <div className="flex flex-col gap-6 w-full">
-              {gameState.gameStatus === 'PLAYING' ? (
-                <ScenarioView 
-                  event={gameState.currentEvent} 
-                  onMakeChoice={handleChoice} 
-                  isLoading={gameState.isLoading} 
-                  state={gameState}
-                />
-              ) : (
-                gameState.lastEventData && (
-                  <FeedbackView 
-                    lastEvent={gameState.lastEventData}
-                    language={gameState.language}
-                    onNext={handleNextTurn}
-                  />
-                )
-              )}
+      {/* Scrollable Main Area: Content pushes naturally */}
+      <main className="relative z-0 flex-1 overflow-y-auto overflow-x-hidden w-full scroll-smooth">
+        <div className="w-full max-w-[500px] mx-auto px-4 pb-12 flex flex-col min-h-full">
+          
+          {/* Error Banner */}
+          {gameState.error && (
+            <div className="mt-4 p-4 bg-accent-red/10 border border-accent-red/20 text-accent-red rounded-card animate-fade-in text-caption">
+              {gameState.error}
             </div>
-          </div>
-        )}
+          )}
 
-        {gameState.gameStatus === 'ENDED' && (
-          <GameOver state={gameState} onRestart={handleRestart} />
-        )}
+          {/* Onboarding */}
+          {gameState.gameStatus === 'ONBOARDING' && (
+            <div className="flex-1 flex flex-col justify-center py-6">
+              <Onboarding 
+                onComplete={handleStartGame} 
+                isLoading={gameState.isLoading} 
+                language={gameState.language}
+                setLanguage={handleLanguageChange}
+              />
+            </div>
+          )}
+
+          {/* Game Loop */}
+          {(gameState.gameStatus === 'PLAYING' || gameState.gameStatus === 'FEEDBACK') && gameState.currentEvent && (
+            <div className="flex flex-col w-full animate-fade-in">
+              
+              {/* Sticky Dashboard inside scroll area */}
+              {/* Stacks naturally below Header visually, but sticks to top of scroll area */}
+              <Dashboard state={gameState} />
+              
+              {/* Vertical spacing after dashboard */}
+              <div className="h-6 shrink-0" /> 
+              
+              {/* Dynamic Content Area */}
+              <div className="flex flex-col gap-6 w-full">
+                {gameState.gameStatus === 'PLAYING' ? (
+                  <ScenarioView 
+                    event={gameState.currentEvent} 
+                    onMakeChoice={handleChoice} 
+                    isLoading={gameState.isLoading} 
+                    state={gameState}
+                  />
+                ) : (
+                  gameState.lastEventData && (
+                    <FeedbackView 
+                      lastEvent={gameState.lastEventData}
+                      language={gameState.language}
+                      onNext={handleNextTurn}
+                    />
+                  )
+                )}
+                
+                {/* Contextual Financial Tip Section */}
+                <div className="mx-1 mt-2 mb-6 p-4 bg-brand/5 border border-brand/10 rounded-2xl flex gap-3 items-start animate-fade-in shadow-sm">
+                   <div className="p-2 bg-brand/10 rounded-full shrink-0 text-brand mt-0.5">
+                      <Lightbulb size={18} strokeWidth={2.5} />
+                   </div>
+                   <div className="flex-1">
+                      <h4 className="text-caption font-bold text-brand uppercase tracking-wider mb-1 opacity-90">
+                        {gameState.language === 'en' ? 'Arth Mitra Says' : 'अर्थ मित्र की सलाह'}
+                      </h4>
+                      <p className="text-body text-neutral-soft/90 italic leading-relaxed">"{currentTip}"</p>
+                   </div>
+                </div>
+                
+              </div>
+            </div>
+          )}
+
+          {/* Game Over */}
+          {gameState.gameStatus === 'ENDED' && (
+             <div className="flex-1 flex flex-col justify-center py-6">
+              <GameOver state={gameState} onRestart={handleRestart} />
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );

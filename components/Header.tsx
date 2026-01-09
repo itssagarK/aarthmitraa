@@ -16,7 +16,7 @@ export const Header: React.FC<HeaderProps> = ({ language, onLanguageChange }) =>
   ];
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 w-full px-4 py-3 backdrop-blur-xl bg-white/40 border-b border-white/20 shadow-sm transition-all">
+    <div className="w-full px-4 py-3 transition-all">
       <div className="max-w-[500px] mx-auto flex items-center justify-between">
         
         {/* Brand */}
@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ language, onLanguageChange }) =>
           </h1>
         </div>
 
-        {/* Master UI Segmented Pill Language Switcher */}
+        {/* Language Switcher */}
         <div className="flex p-1 rounded-full bg-neutral-glass border border-white/40 shrink-0">
           {languages.map((lang) => (
             <button
@@ -47,6 +47,6 @@ export const Header: React.FC<HeaderProps> = ({ language, onLanguageChange }) =>
           ))}
         </div>
       </div>
-    </header>
+    </div>
   );
 };

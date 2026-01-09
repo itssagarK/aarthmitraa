@@ -1,3 +1,4 @@
+
 export type Language = 'en' | 'hi' | 'hinglish';
 
 export interface PlayerProfile {
@@ -29,8 +30,15 @@ export interface GameEvent {
   // Data regarding the PREVIOUS turn's result (for Feedback View)
   previous_outcome_title?: string; // e.g. "You handled that well!"
   previous_outcome_desc?: string; // e.g. "Neighbors are happy, but wallet is crying."
+  financial_explanation?: string; // e.g. "₹5000 withdrawn from Savings for School Fees."
   impact_on_stats?: StatImpact;
   isGameOver?: boolean;
+}
+
+export interface StatTransaction {
+  turn: number;
+  description: string;
+  changes: StatImpact;
 }
 
 export interface GameState {
@@ -44,7 +52,8 @@ export interface GameState {
   health: number;
   
   turn: number;
-  history: string[];
+  history: string[]; // Narrative history
+  statHistory: StatTransaction[]; // Numeric transaction history
   
   currentEvent: GameEvent | null;
   lastEventData: GameEvent | null; // To show feedback for the just-completed turn

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { PlayerProfile, OCCUPATIONS, Language } from '../types';
 import { getTranslation } from '../translations';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { playSound } from '../services/audioService';
 
 interface OnboardingProps {
   onComplete: (profile: PlayerProfile) => void;
@@ -15,13 +16,21 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, isLoading, l
   const [name, setName] = useState('');
   const [selectedOccupation, setSelectedOccupation] = useState<string | null>(null);
 
+  const handleLanguageSelect = (lang: Language) => {
+    playSound('click');
+    setLanguage(lang);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    playSound('click');
+    
     if (step === 1 && name) {
       setStep(2);
     } else if (step === 2 && name && selectedOccupation) {
       const occ = OCCUPATIONS.find(o => o.id === selectedOccupation);
       if (occ) {
+        playSound('success'); // Play success sound when starting game
         onComplete({
           name,
           occupation: occ.id,
@@ -29,6 +38,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, isLoading, l
         });
       }
     }
+  };
+
+  const handleOccupationSelect = (id: string) => {
+    playSound('click');
+    setSelectedOccupation(id);
   };
 
   const t = (key: any) => getTranslation(language, key);
@@ -43,7 +57,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, isLoading, l
             <button
               key={lang}
               type="button"
-              onClick={() => setLanguage(lang)}
+              onClick={() => handleLanguageSelect(lang)}
               className={`px-4 py-2 rounded-full text-caption font-bold uppercase tracking-wider transition-all duration-300 ${
                 language === lang 
                   ? 'bg-brand text-white shadow-btn' 
@@ -110,7 +124,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, isLoading, l
                   <button
                     key={occ.id}
                     type="button"
-                    onClick={() => setSelectedOccupation(occ.id)}
+                    onClick={() => handleOccupationSelect(occ.id)}
                     disabled={isLoading}
                     className={`
                       relative flex flex-col items-start p-4 rounded-card transition-all duration-300 text-left border
