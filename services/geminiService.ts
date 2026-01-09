@@ -25,10 +25,10 @@ STYLE RULES:
 3. **Tone:** Warm, non-judgmental, casual (like a friend).
 4. **Format:** Strict JSON.
 
-When generating choices:
-- Option A: Expensive/Tempting (Instant gratification or social pressure).
-- Option B: Balanced/Middle path.
-- Option C: Frugal/Hard (Saves money but might hurt happiness/relationships).
+FINANCIAL RULES (STRICT):
+1. **Cost Consistency:** If a choice costs money (e.g. ₹500), you MUST output a negative savings impact (e.g. -500).
+2. **Debt Reality:** If the player has existing Debt, assume they pay ~2% interest per turn unless they pay it off. Increase the debt impact slightly (e.g. debt: +500) to simulate this if no payment is made.
+3. **Income:** Do NOT automatically add monthly income unless the narrative specifically says "It is Payday".
 `;
 
 const responseSchema: Schema = {
@@ -137,8 +137,9 @@ export const nextTurn = async (
     Player Action: "${choiceText}" (Cost/Label: ${choiceCostLabel || 'N/A'}).
     Previous Scenario: "${currentState.currentEvent?.narrative_hook}".
 
-    1. Calculate IMPACT of this action (Feedback).
-    2. Generate 'financial_explanation': BE SPECIFIC. Where did the money come from? Where did it go?
+    1. Calculate IMPACT of this action (Feedback). 
+       IMPORTANT: If the action had a cost (e.g. ₹500), you MUST SUBTRACT that amount from 'savings' in 'impact_on_stats' (e.g. savings: -500).
+    2. Generate 'financial_explanation': BE SPECIFIC and ACCURATE to the numbers.
     3. Generate 'previous_outcome_title' (e.g. "Great job!", "Risky!", "Family is sad").
     4. Generate 'previous_outcome_desc'.
     5. Create the NEXT Situation ('narrative_hook') - Make it different from the last one.

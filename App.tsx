@@ -5,9 +5,20 @@ import { Dashboard } from './components/Dashboard';
 import { ScenarioView } from './components/ScenarioView';
 import { FeedbackView } from './components/FeedbackView';
 import { GameOver } from './components/GameOver';
+import { FinancialTipCard } from './components/FinancialTipCard';
 import { GameState, PlayerProfile, Choice, Language, OCCUPATIONS } from './types';
 import { startSimulation, nextTurn } from './services/geminiService';
-import { Lightbulb } from 'lucide-react';
+
+// --- UTILS ---
+const safeParseInt = (val: any): number => {
+  if (typeof val === 'number') return Math.round(val);
+  if (typeof val === 'string') {
+    // Remove commas, currency symbols, and whitespace
+    const clean = val.replace(/[^0-9.-]/g, '');
+    return Math.round(Number(clean)) || 0;
+  }
+  return 0;
+};
 
 // --- TIP DATA & LOGIC ---
 
@@ -142,22 +153,24 @@ const App: React.FC = () => {
       
       const impacts = resultData.impact_on_stats;
       
-      // 2. Update Stats
+      // 2. Update Stats with Safe Parsing
       setGameState(prev => {
-        const impactSavings = Number(impacts.savings) || 0;
-        const impactDebt = Number(impacts.debt) || 0;
-        const impactHappiness = Number(impacts.happiness) || 0;
-        const impactHealth = Number(impacts.health) || 0;
+        const impactSavings = safeParseInt(impacts.savings);
+        const impactDebt = safeParseInt(impacts.debt);
+        const impactHappiness = safeParseInt(impacts.happiness);
+        const impactHealth = safeParseInt(impacts.health);
 
         let newSavings = prev.savings + impactSavings;
         let newDebt = prev.debt + impactDebt;
         
         // Smart Balance Normalization
+        // If savings go negative, debt increases.
         if (newSavings < 0) {
           newDebt += Math.abs(newSavings);
           newSavings = 0;
         }
         
+        // If debt goes negative (overpaid), it flows back to savings.
         if (newDebt < 0) {
           newSavings += Math.abs(newDebt);
           newDebt = 0;
@@ -169,7 +182,7 @@ const App: React.FC = () => {
         newHappiness = Math.min(100, Math.max(0, newHappiness));
         newHealth = Math.min(100, Math.max(0, newHealth));
 
-        // 3. Record history
+        // 3. Record history (Actual delta after normalization)
         const actualChangeSavings = newSavings - prev.savings;
         const actualChangeDebt = newDebt - prev.debt;
         const actualChangeHappiness = newHappiness - prev.happiness;
@@ -306,17 +319,11 @@ const App: React.FC = () => {
                 )}
                 
                 {/* Contextual Financial Tip Section */}
-                <div className="mx-1 mt-2 mb-6 p-4 bg-brand/5 border border-brand/10 rounded-2xl flex gap-3 items-start animate-fade-in shadow-sm">
-                   <div className="p-2 bg-brand/10 rounded-full shrink-0 text-brand mt-0.5">
-                      <Lightbulb size={18} strokeWidth={2.5} />
-                   </div>
-                   <div className="flex-1">
-                      <h4 className="text-caption font-bold text-brand uppercase tracking-wider mb-1 opacity-90">
-                        {gameState.language === 'en' ? 'Arth Mitra Says' : 'अर्थ मित्र की सलाह'}
-                      </h4>
-                      <p className="text-body text-neutral-soft/90 italic leading-relaxed">"{currentTip}"</p>
-                   </div>
-                </div>
+                <FinancialTipCard 
+                  key={gameState.turn} // Force re-render/animation on new turn
+                  tip={currentTip} 
+                  language={gameState.language} 
+                />
                 
               </div>
             </div>

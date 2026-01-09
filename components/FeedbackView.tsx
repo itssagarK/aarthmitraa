@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GameEvent, Language } from '../types';
 import { getTranslation } from '../translations';
-import { TrendingUp, TrendingDown, Heart, Smile, ArrowRight, IndianRupee, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, Heart, Smile, ArrowRight, IndianRupee, Info, ChevronDown } from 'lucide-react';
 import { playSound } from '../services/audioService';
 
 interface FeedbackViewProps {
@@ -12,6 +12,7 @@ interface FeedbackViewProps {
 
 export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language, onNext }) => {
   const impacts = lastEvent.impact_on_stats;
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (!impacts) return;
@@ -28,6 +29,11 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
       playSound('click'); // Neutral
     }
   }, [lastEvent]); 
+
+  // Reset expansion state when event changes
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [lastEvent]);
 
   if (!impacts) return null;
 
@@ -55,10 +61,21 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
 
         {/* Financial Flow Explanation */}
         {lastEvent.financial_explanation && (
-           <div className="bg-white/60 border border-white/80 rounded-2xl p-4 text-caption text-neutral-dark flex items-start gap-3 text-left shadow-sm">
+           <button 
+             onClick={() => setIsExpanded(!isExpanded)}
+             className="w-full bg-white/60 border border-white/80 rounded-2xl p-4 text-caption text-neutral-dark flex items-start gap-3 text-left shadow-sm hover:bg-white/80 transition-all duration-200 active:scale-[0.98] group cursor-pointer"
+             aria-expanded={isExpanded}
+           >
               <Info className="w-5 h-5 text-brand shrink-0 mt-0.5" />
-              <span className="leading-snug">{lastEvent.financial_explanation}</span>
-           </div>
+              <div className="flex-1 min-w-0">
+                 <span className={`leading-snug block ${isExpanded ? '' : 'line-clamp-2'}`}>
+                    {lastEvent.financial_explanation}
+                 </span>
+              </div>
+              <ChevronDown 
+                className={`w-4 h-4 text-neutral-soft/70 shrink-0 mt-1 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
+              />
+           </button>
         )}
       </div>
 
