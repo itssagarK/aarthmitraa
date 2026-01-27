@@ -41,6 +41,86 @@ const AnimatedCounter = ({ value, formatter }: { value: number, formatter?: (v: 
   return <>{formatter ? formatter(displayValue) : Math.round(displayValue)}</>;
 };
 
+interface StatChipProps {
+  label: string;
+  value: number;
+  icon: React.ReactNode;
+  onClick: () => void;
+  formatter?: (v: number) => string | number;
+  isHighGood?: boolean; // Defaults to true
+  baseIconColor?: string;
+}
+
+const StatChip: React.FC<StatChipProps> = ({ 
+  label, 
+  value, 
+  icon, 
+  onClick, 
+  formatter, 
+  isHighGood = true,
+  baseIconColor = "text-brand"
+}) => {
+  const [flashState, setFlashState] = useState<'idle' | 'good' | 'bad'>('idle');
+  const prevValue = useRef(value);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    // Skip flash on mount
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      prevValue.current = value;
+      return;
+    }
+
+    if (value !== prevValue.current) {
+      const diff = value - prevValue.current;
+      // If no change, do nothing
+      if (diff === 0) return;
+
+      const isIncrease = diff > 0;
+      const isGoodOutcome = isHighGood ? isIncrease : !isIncrease;
+
+      setFlashState(isGoodOutcome ? 'good' : 'bad');
+
+      const timer = setTimeout(() => {
+        setFlashState('idle');
+      }, 600); // Flash duration
+
+      prevValue.current = value;
+      return () => clearTimeout(timer);
+    }
+  }, [value, isHighGood]);
+
+  // Dynamic classes
+  const baseClasses = "flex flex-col items-center justify-center p-3 rounded-chip min-w-[90px] min-h-[70px] backdrop-blur-md shadow-sm transition-all duration-300 active:scale-95 cursor-pointer hover:bg-white border flex-1 group relative overflow-hidden";
+  
+  let stateClasses = "bg-white/80 border-white/60";
+  let iconColor = baseIconColor;
+
+  if (flashState === 'good') {
+    stateClasses = "bg-accent-green/10 border-accent-green/60 shadow-md ring-1 ring-accent-green/30";
+    iconColor = "text-accent-green";
+  } else if (flashState === 'bad') {
+    stateClasses = "bg-accent-red/10 border-accent-red/60 shadow-md ring-1 ring-accent-red/30";
+    iconColor = "text-accent-red";
+  }
+
+  return (
+    <button onClick={onClick} className={`${baseClasses} ${stateClasses}`}>
+      {/* Flash overlay */}
+      <div className={`absolute inset-0 transition-opacity duration-500 pointer-events-none ${flashState === 'good' ? 'bg-accent-green/10 opacity-100' : 'opacity-0'} ${flashState === 'bad' ? 'bg-accent-red/10 opacity-100' : ''}`} />
+      
+      <div className={`relative z-10 flex items-center gap-1 mb-1 transition-colors duration-300 ${iconColor}`}>
+         {icon}
+      </div>
+      <span className="relative z-10 text-[10px] font-bold uppercase text-neutral-soft tracking-wider">{label}</span>
+      <span className="relative z-10 text-h3 text-neutral-dark mt-0.5">
+         <AnimatedCounter value={value} formatter={formatter} />
+      </span>
+    </button>
+  );
+};
+
 export const Dashboard: React.FC<DashboardProps> = ({ state }) => {
   const [selectedStat, setSelectedStat] = useState<'savings' | 'debt' | 'happiness' | 'health' | null>(null);
   
@@ -65,9 +145,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ state }) => {
     setSelectedStat(stat);
   };
 
-  // Master UI Stat Chip Styles
-  const statChipClass = "flex flex-col items-center justify-center p-3 rounded-chip min-w-[90px] min-h-[70px] bg-white/80 backdrop-blur-md border border-white/60 shadow-sm transition-transform active:scale-95 cursor-pointer hover:bg-white";
-
   return (
     <>
       {/* 
@@ -79,49 +156,45 @@ export const Dashboard: React.FC<DashboardProps> = ({ state }) => {
       <div className="sticky top-0 z-40 -mx-4 px-4 pt-4 pb-4 overflow-x-auto scrollbar-hide bg-[#f0fdf9]/95 backdrop-blur-md border-b border-white/20 shadow-sm transition-all">
         <div className="flex gap-3 w-max mx-auto sm:w-full sm:mx-0 justify-between sm:justify-center">
           
-          {/* Savings Bubble */}
-          <button onClick={() => handleStatClick('savings')} className={`${statChipClass} group flex-1`}>
-            <div className="flex items-center gap-1 mb-1 text-accent-green">
-               <IndianRupee className="w-4 h-4" strokeWidth={2.5} />
-            </div>
-            <span className="text-[10px] font-bold uppercase text-neutral-soft tracking-wider">{t('savings')}</span>
-            <span className="text-h3 text-neutral-dark mt-0.5">
-               <AnimatedCounter value={state.savings} formatter={savingsFormatter} />
-            </span>
-          </button>
+          <StatChip 
+            label={t('savings')} 
+            value={state.savings} 
+            formatter={savingsFormatter}
+            onClick={() => handleStatClick('savings')}
+            icon={<IndianRupee className="w-4 h-4" strokeWidth={2.5} />}
+            baseIconColor="text-accent-green"
+            isHighGood={true}
+          />
 
-          {/* Debt Bubble */}
-          <button onClick={() => handleStatClick('debt')} className={`${statChipClass} group flex-1`}>
-             <div className={`flex items-center gap-1 mb-1 ${state.debt > 0 ? 'text-accent-red' : 'text-neutral-soft'}`}>
-               {state.debt > 0 ? <TrendingDown className="w-4 h-4" strokeWidth={2.5} /> : <TrendingUp className="w-4 h-4" strokeWidth={2.5} />}
-             </div>
-             <span className="text-[10px] font-bold uppercase text-neutral-soft tracking-wider">{t('debt')}</span>
-             <span className="text-h3 text-neutral-dark mt-0.5">
-                <AnimatedCounter value={state.debt} formatter={debtFormatter} />
-             </span>
-          </button>
+          <StatChip 
+            label={t('debt')} 
+            value={state.debt} 
+            formatter={debtFormatter}
+            onClick={() => handleStatClick('debt')}
+            icon={state.debt > 0 ? <TrendingDown className="w-4 h-4" strokeWidth={2.5} /> : <TrendingUp className="w-4 h-4" strokeWidth={2.5} />}
+            baseIconColor={state.debt > 0 ? 'text-accent-red' : 'text-neutral-soft'}
+            isHighGood={false}
+          />
 
-          {/* Joy Bubble */}
-          <button onClick={() => handleStatClick('happiness')} className={`${statChipClass} group flex-1`}>
-             <div className="flex items-center gap-1 mb-1 text-accent-yellow">
-                <Smile className="w-4 h-4" strokeWidth={2.5} />
-             </div>
-             <span className="text-[10px] font-bold uppercase text-neutral-soft tracking-wider">{t('happiness')}</span>
-             <span className="text-h3 text-neutral-dark mt-0.5">
-               <AnimatedCounter value={state.happiness} formatter={percentageFormatter} />
-             </span>
-          </button>
+          <StatChip 
+            label={t('happiness')} 
+            value={state.happiness} 
+            formatter={percentageFormatter}
+            onClick={() => handleStatClick('happiness')}
+            icon={<Smile className="w-4 h-4" strokeWidth={2.5} />}
+            baseIconColor="text-accent-yellow"
+            isHighGood={true}
+          />
 
-          {/* Health Bubble */}
-          <button onClick={() => handleStatClick('health')} className={`${statChipClass} group flex-1`}>
-             <div className="flex items-center gap-1 mb-1 text-accent-pink">
-                <Heart className="w-4 h-4 fill-current" />
-             </div>
-             <span className="text-[10px] font-bold uppercase text-neutral-soft tracking-wider">{t('health')}</span>
-             <span className="text-h3 text-neutral-dark mt-0.5">
-               <AnimatedCounter value={state.health} formatter={percentageFormatter} />
-             </span>
-          </button>
+          <StatChip 
+            label={t('health')} 
+            value={state.health} 
+            formatter={percentageFormatter}
+            onClick={() => handleStatClick('health')}
+            icon={<Heart className="w-4 h-4 fill-current" />}
+            baseIconColor="text-accent-pink"
+            isHighGood={true}
+          />
 
         </div>
       </div>
