@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { GameEvent, Language } from '../types';
 import { getTranslation } from '../translations';
 import { TrendingUp, TrendingDown, Heart, Smile, ArrowRight, IndianRupee, Info, ChevronDown } from 'lucide-react';
@@ -13,6 +13,7 @@ interface FeedbackViewProps {
 export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language, onNext }) => {
   const impacts = lastEvent.impact_on_stats;
   const [isExpanded, setIsExpanded] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!impacts) return;
@@ -44,11 +45,15 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
     onNext();
   };
 
+  const handleToggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
-    <div className="flex flex-col gap-6 animate-fade-in justify-center w-full">
+    <div className="flex flex-col gap-6 animate-fade-in justify-center w-full min-h-full">
       
       {/* Result Story Card */}
-      <div className="glass-card p-8 rounded-card text-center shadow-xl border-white/60">
+      <div className="glass-card p-8 rounded-card text-center shadow-xl border-white/60 relative z-10">
         <div className="inline-block px-4 py-1.5 rounded-full bg-accent-yellow/20 text-brand text-caption font-bold tracking-wide uppercase mb-6">
           Result
         </div>
@@ -62,18 +67,23 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
         {/* Financial Flow Explanation */}
         {lastEvent.financial_explanation && (
            <button 
-             onClick={() => setIsExpanded(!isExpanded)}
-             className="w-full bg-white/60 border border-white/80 rounded-2xl p-4 text-caption text-neutral-dark flex items-start gap-3 text-left shadow-sm hover:bg-white/80 transition-all duration-200 active:scale-[0.98] group cursor-pointer"
+             onClick={handleToggleExpand}
+             className="w-full bg-white/60 border border-white/80 rounded-2xl p-4 text-caption text-neutral-dark flex items-start gap-3 text-left shadow-sm hover:bg-white/80 transition-all duration-200 active:scale-[0.98] group cursor-pointer overflow-hidden"
              aria-expanded={isExpanded}
            >
               <Info className="w-5 h-5 text-brand shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                 <span className={`leading-snug block ${isExpanded ? '' : 'line-clamp-2'}`}>
-                    {lastEvent.financial_explanation}
-                 </span>
+                 <div 
+                   className="transition-[max-height] duration-500 ease-in-out overflow-hidden"
+                   style={{ maxHeight: isExpanded ? '500px' : '44px' }} // 44px approx 2 lines
+                 >
+                   <span className={`leading-snug block ${isExpanded ? '' : 'line-clamp-2'}`}>
+                      {lastEvent.financial_explanation}
+                   </span>
+                 </div>
               </div>
               <ChevronDown 
-                className={`w-4 h-4 text-neutral-soft/70 shrink-0 mt-1 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
+                className={`w-4 h-4 text-neutral-soft/70 shrink-0 mt-1 transition-transform duration-500 ease-in-out ${isExpanded ? 'rotate-180' : ''}`} 
               />
            </button>
         )}
@@ -127,15 +137,17 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
         )}
       </div>
 
-      {/* Primary CTA Button */}
-      <button
-        onClick={handleNextClick}
-        className="w-full bg-brand text-white py-5 rounded-btn font-bold text-h3 shadow-btn hover:shadow-btn-hover hover:-translate-y-0.5 transition-all flex items-center justify-center group mt-2"
-      >
-        {t('next_turn')} <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
-      </button>
+      {/* Primary CTA Button - Sticky at bottom to ensure visibility */}
+      <div className="sticky bottom-0 pb-4 pt-4 -mb-4 bg-gradient-to-t from-[#f0fdf9] via-[#f0fdf9]/95 to-transparent z-20 mt-auto">
+        <button
+          onClick={handleNextClick}
+          className="w-full bg-brand text-white py-5 rounded-btn font-bold text-h3 shadow-btn hover:shadow-btn-hover hover:-translate-y-0.5 transition-all flex items-center justify-center group"
+        >
+          {t('next_turn')} <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
+        </button>
+      </div>
 
-      <div className="h-4" />
+      <div className="h-2" />
     </div>
   );
 };
