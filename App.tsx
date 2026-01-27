@@ -252,7 +252,7 @@ const App: React.FC = () => {
     setGameState(prev => {
        const isDepressed = prev.happiness <= 0;
        const isSick = prev.health <= 0;
-       const isHighDebt = prev.debt > 50000;
+       const isHighDebt = prev.debt > 75000;
        const isMaxTurns = prev.turn >= 12;
        
        const isGameOver = isDepressed || isSick || isHighDebt || isMaxTurns || prev.lastEventData?.isGameOver;

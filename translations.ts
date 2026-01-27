@@ -66,7 +66,57 @@ export const UI_TEXT = {
     hi: "यात्रा पूरी हुई!",
     hinglish: "Journey Complete!"
   },
-  game_over_loss: {
+  game_over_win_body: {
+    en: "You balanced money, health, and family perfectly. A true Arth Mitra!",
+    hi: "आपने पैसा, सेहत और परिवार का सही संतुलन बनाया। सच्चे अर्थ मित्र!",
+    hinglish: "Paisa, health aur family ka perfect balance banaya. True Arth Mitra!"
+  },
+  
+  game_over_debt_title: {
+    en: "Bankrupt!",
+    hi: "दिवालिया!",
+    hinglish: "Diwaliya!"
+  },
+  game_over_debt_body: {
+    en: "The debt trap was too deep. Interest ate up everything.",
+    hi: "कर्ज का जाल बहुत गहरा था। ब्याज ने सब कुछ खत्म कर दिया।",
+    hinglish: "Debt ka jaal bahut gehra tha. Interest ne sab kuch khatam kar diya."
+  },
+  
+  game_over_health_title: {
+    en: "Health Collapse",
+    hi: "सेहत खराब",
+    hinglish: "Health Kharab"
+  },
+  game_over_health_body: {
+    en: "You worked too hard and ignored your body. Health is wealth, and you lost it.",
+    hi: "आपने बहुत मेहनत की लेकिन शरीर को नजरअंदाज किया। जान है तो जहान है।",
+    hinglish: "Bahut mehnat ki par body ignore kiya. Health hi wealth hai, aur wo chali gayi."
+  },
+  
+  game_over_happiness_title: {
+    en: "Lost Hope",
+    hi: "उम्मीद खो दी",
+    hinglish: "Hope Kho Di"
+  },
+  game_over_happiness_body: {
+    en: "The stress was too much. Money matters, but so does peace of mind.",
+    hi: "तनाव बहुत ज्यादा था। पैसा जरूरी है, लेकिन मन की शांति भी।",
+    hinglish: "Stress bahut jyada tha. Paisa zaruri hai, par peace of mind bhi."
+  },
+
+  game_over_survival_title: {
+    en: "Survived...",
+    hi: "बच गए...",
+    hinglish: "Bach gaye..."
+  },
+  game_over_survival_body: {
+    en: "You made it to the end, but the debt burden is heavy.",
+    hi: "आप अंत तक तो पहुँच गए, लेकिन कर्ज का बोझ भारी है।",
+    hinglish: "End tak pahunch gaye, par udhaar ka bojh bhaari hai."
+  },
+
+  game_over_loss: { // Fallback
     en: "Difficult Times...",
     hi: "मुश्किल समय...",
     hinglish: "Mushkil Time..."
@@ -74,5 +124,5 @@ export const UI_TEXT = {
 };
 
 export const getTranslation = (lang: Language, key: keyof typeof UI_TEXT) => {
-  return UI_TEXT[key][lang] || UI_TEXT[key]['en'];
+  return UI_TEXT[key] ? (UI_TEXT[key][lang] || UI_TEXT[key]['en']) : key;
 };
