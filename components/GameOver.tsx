@@ -12,24 +12,31 @@ interface GameOverProps {
 export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
   const t = (key: any) => getTranslation(state.language, key);
 
+  // Dynamic Debt Thresholds
+  // Game Over if Debt > 6 months of income
+  // Survival (Yellow) if Debt > 4 months of income
+  const income = state.profile?.monthlyIncome || 15000;
+  const limitDebt = income * 6;
+  const warningDebt = income * 4;
+
   // Determine Game Over Reason
   let reason: 'win' | 'debt' | 'health' | 'happiness' | 'survival' = 'win';
   let icon = <Trophy className="w-14 h-14 text-accent-green" />;
   let colorClass = 'bg-accent-green/20 border-white';
 
-  if (state.debt > 75000) {
+  if (state.debt > limitDebt) {
     reason = 'debt';
     icon = <AlertTriangle className="w-14 h-14 text-accent-red" />;
     colorClass = 'bg-accent-red/20 border-white';
-  } else if (state.health <= 0) {
+  } else if (state.health <= 5) {
     reason = 'health';
     icon = <Skull className="w-14 h-14 text-accent-red" />;
     colorClass = 'bg-accent-red/20 border-white';
-  } else if (state.happiness <= 0) {
+  } else if (state.happiness <= 5) {
     reason = 'happiness';
     icon = <Frown className="w-14 h-14 text-accent-yellow" />;
     colorClass = 'bg-accent-yellow/20 border-white';
-  } else if (state.debt > 50000) {
+  } else if (state.debt > warningDebt) {
     reason = 'survival'; // Reached end but High Debt
     icon = <AlertTriangle className="w-14 h-14 text-accent-yellow" />;
     colorClass = 'bg-accent-yellow/20 border-white';
@@ -95,7 +102,7 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
         </div>
         <div className="p-2">
           <div className="text-caption text-neutral-soft uppercase tracking-widest font-bold mb-1">{t('debt')}</div>
-          <div className={`text-h3 font-bold ${state.debt > 50000 ? 'text-accent-red' : 'text-neutral-dark'}`}>
+          <div className={`text-h3 font-bold ${state.debt > warningDebt ? 'text-accent-red' : 'text-neutral-dark'}`}>
             ₹{state.debt.toLocaleString()}
           </div>
         </div>

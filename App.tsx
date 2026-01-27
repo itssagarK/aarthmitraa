@@ -250,9 +250,14 @@ const App: React.FC = () => {
 
   const handleNextTurn = () => {
     setGameState(prev => {
-       const isDepressed = prev.happiness <= 0;
-       const isSick = prev.health <= 0;
-       const isHighDebt = prev.debt > 75000;
+       const income = prev.profile?.monthlyIncome || 15000;
+       
+       // Dynamic Debt Limit: 6 months of income is a debt trap.
+       const maxDebt = income * 6;
+       
+       const isDepressed = prev.happiness <= 5; 
+       const isSick = prev.health <= 5; 
+       const isHighDebt = prev.debt > maxDebt;
        const isMaxTurns = prev.turn >= 12;
        
        const isGameOver = isDepressed || isSick || isHighDebt || isMaxTurns || prev.lastEventData?.isGameOver;
