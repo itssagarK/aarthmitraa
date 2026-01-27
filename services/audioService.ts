@@ -1,4 +1,10 @@
-import { Howl } from 'howler';
+import { Howl, Howler } from 'howler';
+
+const STORAGE_KEY_MUTE = 'arth_mitra_muted';
+
+// Initialize global mute state
+const initialMute = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY_MUTE) === 'true' : false;
+Howler.mute(initialMute);
 
 // Initialize sounds with reliable CDN URLs
 // Using Mixkit free preview assets for UI sounds
@@ -52,4 +58,17 @@ export const playSound = (type: SoundType) => {
   } catch (error) {
     console.warn('Audio playback failed:', error);
   }
+};
+
+export const toggleMute = (): boolean => {
+  const currentState = localStorage.getItem(STORAGE_KEY_MUTE) === 'true';
+  const newState = !currentState;
+  Howler.mute(newState);
+  localStorage.setItem(STORAGE_KEY_MUTE, String(newState));
+  return newState;
+};
+
+export const isMuted = (): boolean => {
+  if (typeof localStorage === 'undefined') return false;
+  return localStorage.getItem(STORAGE_KEY_MUTE) === 'true';
 };
