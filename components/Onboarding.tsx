@@ -25,19 +25,28 @@ export const Onboarding: React.FC<OnboardingProps> = ({
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [name, setName] = useState('');
   const [selectedOccupation, setSelectedOccupation] = useState<string | null>(null);
+  const [isExiting, setIsExiting] = useState(false);
 
   const handleLanguageSelect = (lang: Language) => {
     playSound('click');
     setLanguage(lang);
-    // Short delay to let the user see their selection before transitioning
+    
+    // Trigger exit animation
+    setIsExiting(true);
+    
+    // Wait for animation to complete before switching steps
     setTimeout(() => {
        setStep(1);
-    }, 250);
+       setIsExiting(false);
+    }, 400);
   };
 
   const handleResume = () => {
     playSound('success');
-    if (onContinue) onContinue();
+    setIsExiting(true);
+    setTimeout(() => {
+      if (onContinue) onContinue();
+    }, 400);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -71,7 +80,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({
       
       {/* STEP 0: LANGUAGE SELECTION & RESUME */}
       {step === 0 && (
-        <div className="glass-card rounded-[32px] p-8 shadow-glass text-center animate-fade-in min-h-[420px] flex flex-col justify-center relative overflow-hidden">
+        <div 
+          className={`
+            glass-card rounded-[32px] p-8 shadow-glass text-center min-h-[420px] flex flex-col justify-center relative overflow-hidden
+            transform transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)
+            ${isExiting ? 'opacity-0 -translate-x-12 scale-95 blur-sm' : 'animate-fade-in opacity-100 translate-x-0 scale-100'}
+          `}
+        >
            {/* Decorative background */}
            <div className="absolute top-0 right-0 w-32 h-32 bg-accent-yellow rounded-full blur-[60px] opacity-20 pointer-events-none"></div>
            <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand rounded-full blur-[60px] opacity-10 pointer-events-none"></div>
