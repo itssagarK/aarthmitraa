@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Onboarding } from './components/Onboarding';
 import { Dashboard } from './components/Dashboard';
@@ -8,6 +8,7 @@ import { GameOver } from './components/GameOver';
 import { FinancialTipCard } from './components/FinancialTipCard';
 import { GameState, PlayerProfile, Choice, Language, OCCUPATIONS } from './types';
 import { startSimulation, nextTurn } from './services/geminiService';
+import { saveGame, loadGame, clearSave, getSavedGameMeta } from './services/storageService';
 
 // --- UTILS ---
 const safeParseInt = (val: any): number => {
@@ -110,12 +111,36 @@ const initialState: GameState = {
 
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(initialState);
+  const [savedGameMeta, setSavedGameMeta] = useState<any>(null);
+
+  // Check for save on mount
+  useEffect(() => {
+    const meta = getSavedGameMeta();
+    setSavedGameMeta(meta);
+  }, []);
+
+  // Auto-save effect
+  useEffect(() => {
+    if (gameState.gameStatus === 'PLAYING' || gameState.gameStatus === 'FEEDBACK') {
+      saveGame(gameState);
+    }
+  }, [gameState]);
 
   const handleLanguageChange = (lang: Language) => {
     setGameState(prev => ({ ...prev, language: lang }));
   };
 
+  const handleContinueGame = () => {
+    const savedState = loadGame();
+    if (savedState) {
+      setGameState(savedState);
+    }
+  };
+
   const handleStartGame = async (profile: PlayerProfile) => {
+    // Clear any previous save when starting fresh
+    clearSave();
+    
     setGameState(prev => ({ 
       ...prev, 
       profile, 
@@ -240,7 +265,9 @@ const App: React.FC = () => {
   };
 
   const handleRestart = () => {
+    clearSave(); // Clear save on explicit restart
     setGameState(initialState);
+    setSavedGameMeta(null);
   };
 
   // Get current tip based on state
@@ -284,6 +311,8 @@ const App: React.FC = () => {
                 isLoading={gameState.isLoading} 
                 language={gameState.language}
                 setLanguage={handleLanguageChange}
+                savedGameMeta={savedGameMeta}
+                onContinue={handleContinueGame}
               />
             </div>
           )}

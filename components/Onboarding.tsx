@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { PlayerProfile, OCCUPATIONS, Language } from '../types';
 import { getTranslation } from '../translations';
-import { ArrowRight, Sparkles, Globe, Check } from 'lucide-react';
+import { ArrowRight, Sparkles, Globe, Check, PlayCircle, Clock } from 'lucide-react';
 import { playSound } from '../services/audioService';
 
 interface OnboardingProps {
@@ -9,9 +9,18 @@ interface OnboardingProps {
   isLoading: boolean;
   language: Language;
   setLanguage: (lang: Language) => void;
+  savedGameMeta?: { name: string; occupation: string; turn: number; savings: number } | null;
+  onContinue?: () => void;
 }
 
-export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, isLoading, language, setLanguage }) => {
+export const Onboarding: React.FC<OnboardingProps> = ({ 
+  onComplete, 
+  isLoading, 
+  language, 
+  setLanguage, 
+  savedGameMeta,
+  onContinue 
+}) => {
   // Steps: 0 = Language, 1 = Name, 2 = Occupation
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [name, setName] = useState('');
@@ -24,6 +33,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, isLoading, l
     setTimeout(() => {
        setStep(1);
     }, 250);
+  };
+
+  const handleResume = () => {
+    playSound('success');
+    if (onContinue) onContinue();
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -55,20 +69,51 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, isLoading, l
   return (
     <div className="flex flex-col gap-6 pt-4 w-full max-w-md mx-auto">
       
-      {/* STEP 0: LANGUAGE SELECTION */}
+      {/* STEP 0: LANGUAGE SELECTION & RESUME */}
       {step === 0 && (
         <div className="glass-card rounded-[32px] p-8 shadow-glass text-center animate-fade-in min-h-[420px] flex flex-col justify-center relative overflow-hidden">
            {/* Decorative background */}
            <div className="absolute top-0 right-0 w-32 h-32 bg-accent-yellow rounded-full blur-[60px] opacity-20 pointer-events-none"></div>
            <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand rounded-full blur-[60px] opacity-10 pointer-events-none"></div>
 
-           <div className="mb-8 space-y-4 relative">
-             <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto text-brand transform rotate-3">
-                <Globe size={32} strokeWidth={1.5} />
+           {/* RESUME CARD (If save exists) */}
+           {savedGameMeta && (
+             <div className="mb-8 relative z-10">
+               <div className="text-left text-caption font-bold text-neutral-soft mb-2 ml-1 uppercase tracking-wide">Continue Journey</div>
+               <button 
+                 onClick={handleResume}
+                 className="w-full bg-white/80 backdrop-blur-md border border-brand/20 p-5 rounded-[24px] shadow-sm hover:shadow-md hover:bg-white hover:-translate-y-0.5 transition-all text-left flex items-center gap-4 group"
+               >
+                 <div className="w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
+                    <PlayCircle className="w-6 h-6 fill-brand/20" />
+                 </div>
+                 <div className="flex-1 min-w-0">
+                    <h3 className="text-h3 font-bold text-brand truncate">{savedGameMeta.name}</h3>
+                    <div className="flex items-center gap-3 text-caption text-neutral-soft font-medium mt-0.5">
+                      <span className="flex items-center gap-1"><Clock size={12}/> Turn {savedGameMeta.turn}</span>
+                      <span className="w-1 h-1 rounded-full bg-neutral-soft/30"></span>
+                      <span>{savedGameMeta.occupation}</span>
+                    </div>
+                 </div>
+                 <div className="text-brand opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
+                    <ArrowRight size={20} />
+                 </div>
+               </button>
+               <div className="relative flex py-5 items-center">
+                  <div className="flex-grow border-t border-neutral-soft/20"></div>
+                  <span className="flex-shrink-0 mx-4 text-neutral-soft/50 text-xs font-bold uppercase tracking-widest">Or New Game</span>
+                  <div className="flex-grow border-t border-neutral-soft/20"></div>
+               </div>
+             </div>
+           )}
+
+           <div className="mb-6 space-y-2 relative">
+             <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto text-brand transform rotate-3 mb-4">
+                <Globe size={28} strokeWidth={1.5} />
              </div>
              <div>
-                <h2 className="text-h1 text-brand font-bold tracking-tight">Choose Language</h2>
-                <p className="text-body text-neutral-soft mt-1 font-medium opacity-80">भाषा चुनें / Bhasha Chunein</p>
+                <h2 className="text-h2 text-brand font-bold tracking-tight">Choose Language</h2>
+                <p className="text-body text-neutral-soft font-medium opacity-80">भाषा चुनें</p>
              </div>
            </div>
 
