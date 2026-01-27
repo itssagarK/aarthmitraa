@@ -61,6 +61,7 @@ const StatChip: React.FC<StatChipProps> = ({
   baseIconColor = "text-brand"
 }) => {
   const [flashState, setFlashState] = useState<'idle' | 'good' | 'bad'>('idle');
+  const [isPulsing, setIsPulsing] = useState(false);
   const prevValue = useRef(value);
   const isFirstRender = useRef(true);
 
@@ -81,9 +82,11 @@ const StatChip: React.FC<StatChipProps> = ({
       const isGoodOutcome = isHighGood ? isIncrease : !isIncrease;
 
       setFlashState(isGoodOutcome ? 'good' : 'bad');
+      setIsPulsing(true);
 
       const timer = setTimeout(() => {
         setFlashState('idle');
+        setIsPulsing(false);
       }, 600); // Flash duration
 
       prevValue.current = value;
@@ -105,8 +108,11 @@ const StatChip: React.FC<StatChipProps> = ({
     iconColor = "text-accent-red";
   }
 
+  // Add scale pulse effect
+  const transformClass = isPulsing ? "scale-105" : "scale-100";
+
   return (
-    <button onClick={onClick} className={`${baseClasses} ${stateClasses}`}>
+    <button onClick={onClick} className={`${baseClasses} ${stateClasses} ${transformClass}`}>
       {/* Flash overlay */}
       <div className={`absolute inset-0 transition-opacity duration-500 pointer-events-none ${flashState === 'good' ? 'bg-accent-green/10 opacity-100' : 'opacity-0'} ${flashState === 'bad' ? 'bg-accent-red/10 opacity-100' : ''}`} />
       
