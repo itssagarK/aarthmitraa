@@ -21,6 +21,16 @@ export const UI_TEXT = {
     hi: "मैं आपको पैसे का सही इस्तेमाल करना सिखाऊंगा।",
     hinglish: "Main aapko money handle karna sikhaunga — step by step."
   },
+  welcome_user_title: {
+    en: "Welcome, {name}!",
+    hi: "स्वागत है, {name}!",
+    hinglish: "Welcome, {name}!"
+  },
+  welcome_user_subtitle: {
+    en: "Let's begin your financial journey. Select your role:",
+    hi: "आइए अपनी आर्थिक यात्रा शुरू करें। अपनी भूमिका चुनें:",
+    hinglish: "Chaliye financial journey shuru karte hain. Role select karein:"
+  },
   enter_name: {
     en: "What is your name?",
     hi: "आपका नाम क्या है?",

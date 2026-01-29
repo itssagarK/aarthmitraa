@@ -174,8 +174,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({
           
           {/* Step 2 Header */}
           {step === 2 && (
-             <div className="text-center mb-6 animate-fade-in">
-                <h2 className="text-h2 text-brand font-bold">{t('select_role')}</h2>
+             <div className="text-center mb-6 animate-fade-in space-y-2">
+                <h2 className="text-h2 text-brand font-bold">
+                  {t('welcome_user_title').replace('{name}', name)}
+                </h2>
+                <p className="text-body text-neutral-soft">
+                  {t('welcome_user_subtitle')}
+                </p>
              </div>
           )}
 
