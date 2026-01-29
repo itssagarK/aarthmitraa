@@ -137,31 +137,6 @@ export const UI_TEXT = {
     en: "💡 Bounce Back Strategy",
     hi: "💡 वापसी का तरीका",
     hinglish: "💡 Paisa Wapas Kamane Ka Trick"
-  },
-  tip_debt_Student: {
-    en: "Skill Up: Offer tuition to juniors or sell old books. Avoid 'Buy Now Pay Later' apps!",
-    hi: "ट्यूशन पढ़ाना शुरू करें या पुरानी किताबें बेचें। लोन ऐप्स से दूर रहें!",
-    hinglish: "Juniors ko tuition padhao ya old books becho. Loan apps se door raho!"
-  },
-  tip_debt_Farmer: {
-    en: "Diversify: Start small dairy or poultry side-business. Use Kisan Credit Card (KCC) for low interest.",
-    hi: "दूध या मुर्गी पालन शुरू करें। कम ब्याज के लिए किसान क्रेडिट कार्ड (KCC) का उपयोग करें।",
-    hinglish: "Side business start karo (Dairy/Poultry). Low interest ke liye KCC card use karo."
-  },
-  tip_debt_Shopkeeper: {
-    en: "Clear Stock: Run a clearance sale for dead stock. Switch to cash-only for a while to rebuild capital.",
-    hi: "पुराना सामान सेल में निकालें। कुछ समय के लिए उधारी बंद करें और नकद पर काम करें।",
-    hinglish: "Purana stock sale mein nikaalo. Udhaar band karo aur cash par focus karo."
-  },
-  tip_debt_Worker: {
-    en: "Emergency Fund: Save 10% of daily wage first. Look for skill training schemes (PMKVY) for better pay.",
-    hi: "दिहाड़ी का 10% पहले बचाएं। बेहतर वेतन के लिए सरकारी कौशल योजनाओं (PMKVY) का लाभ उठाएं।",
-    hinglish: "Roz ki kamayi ka 10% save karo. Government skill schemes join karo better salary ke liye."
-  },
-  tip_debt_default: {
-    en: "Track Expenses: Write down every ₹10 spent. Cut tea/snacks cost by 50% immediately.",
-    hi: "खर्चे लिखें: हर ₹10 का हिसाब रखें। चाय/नाश्ते का खर्च तुरंत आधा कर दें।",
-    hinglish: "Ek diary mein har kharcha likho. Faltu kharche (chai/snacks) aadha kar do."
   }
 };
 

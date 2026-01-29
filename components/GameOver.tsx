@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { GameState } from '../types';
 import { getTranslation } from '../translations';
-import { RefreshCcw, Trophy, AlertTriangle, Skull, Frown, Lightbulb, TrendingUp } from 'lucide-react';
+import { RefreshCcw, Trophy, AlertTriangle, Skull, Frown, TrendingUp } from 'lucide-react';
 import { playSound } from '../services/audioService';
+import { getTip, TIP_DATABASE } from '../data/tips';
 
 interface GameOverProps {
   state: GameState;
@@ -75,11 +76,19 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
       break;
   }
 
-  // Get Role specific tip for Debt
+  // Get Role specific tip for Debt from TIP_DATABASE
   const role = state.profile?.occupation || 'Worker';
-  const tipKey = `tip_debt_${role}`;
-  // Fallback to default if role specific tip not found (though we added all roles)
-  const tipText = t(tipKey).startsWith('tip_') ? t('tip_debt_default') : t(tipKey);
+  let tipText = '';
+
+  if (reason === 'debt') {
+    // Try to get specific bankruptcy tip, fallback to default bankruptcy tip
+    const bankruptcyKey = `${role}_bankruptcy`;
+    if (TIP_DATABASE[bankruptcyKey]) {
+      tipText = getTip(bankruptcyKey, state.language);
+    } else {
+      tipText = getTip('default_bankruptcy', state.language);
+    }
+  }
 
   const handleRestartClick = () => {
     playSound('click');

@@ -9,6 +9,7 @@ import { FinancialTipCard } from './components/FinancialTipCard';
 import { GameState, PlayerProfile, Choice, Language, OCCUPATIONS } from './types';
 import { startSimulation, nextTurn } from './services/geminiService';
 import { saveGame, loadGame, clearSave, getSavedGameMeta } from './services/storageService';
+import { TIP_DATABASE, getTip } from './data/tips';
 
 // --- UTILS ---
 const safeParseInt = (val: any): number => {
@@ -21,55 +22,12 @@ const safeParseInt = (val: any): number => {
   return 0;
 };
 
-// --- TIP DATA & LOGIC ---
-
-const TIP_DATABASE = {
-  high_debt: {
-    en: "Debt eats your future. Pay off high-interest loans before spending on luxury.",
-    hi: "कर्ज आपके भविष्य को खा जाता है। शौक पूरा करने से पहले कर्ज चुकाएं।",
-    hinglish: "Udhaar future kha jaata hai. Luxury se pehle high-interest loan chukao."
-  },
-  low_health: {
-    en: "Health is your true wealth. You cannot earn if you are sick.",
-    hi: "सेहत ही असली दौलत है। अगर आप बीमार हैं तो कमा नहीं सकते।",
-    hinglish: "Health hi asli wealth hai. Bimaar rahoge toh kamaoge kaise?"
-  },
-  low_savings: {
-    en: "Start small. Even ₹10 saved daily builds a shield against bad days.",
-    hi: "छोटी शुरुआत करें। रोज ₹10 बचाने से भी बुरे वक्त में मदद मिलती है।",
-    hinglish: "Choti shuruwat karo. Roz ₹10 bachana bhi bure waqt mein kaam aata hai."
-  },
-  Farmer: {
-    en: "Don't rely on just one crop. Diversification is nature's insurance.",
-    hi: "सिर्फ एक फसल पर निर्भर न रहें। विविधता ही प्रकृति का बीमा है।",
-    hinglish: "Sirf ek crop par depend mat raho. Alag-alag fasal lagana hi safety hai."
-  },
-  Shopkeeper: {
-    en: "Never mix shop cash with household expense money. Keep two wallets.",
-    hi: "दुकान के गल्ले को घर के खर्च से न मिलाएं। दो अलग पर्स रखें।",
-    hinglish: "Shop ke galle ko ghar ke kharche se mix mat karo. Do alag wallet rakho."
-  },
-  Student: {
-    en: "Degrees get interviews, but skills get jobs. Keep learning new things.",
-    hi: "डिग्री से इंटरव्यू मिलता है, लेकिन हुनर से नौकरी। नई चीजें सीखते रहें।",
-    hinglish: "Degree se interview milta hai, par skills se job. Nayi cheezein seekhte raho."
-  },
-  Worker: {
-    en: "Your body is your biggest asset. Don't skip meals to save money.",
-    hi: "आपका शरीर ही आपकी सबसे बड़ी पूंजी है। पैसे बचाने के लिए खाना न छोड़ें।",
-    hinglish: "Body hi aapka asset hai. Paise bachane ke chakkar mein khana mat skip karo."
-  },
-  default: {
-    en: "Money is a tool, not a master. Control it before it controls you.",
-    hi: "पैसा एक औजार है, मालिक नहीं। इसे काबू में रखें वरना यह आपको काबू कर लेगा।",
-    hinglish: "Paisa ek tool hai, master nahi. Isse control karo warna ye tumhe control karega."
-  }
-};
+// --- TIP LOGIC ---
 
 const getContextualTip = (state: GameState): string => {
   const { debt, health, savings, profile, language } = state;
   
-  let tipKey: keyof typeof TIP_DATABASE = 'default';
+  let tipKey: string = 'default';
 
   // Priority 1: Critical Stats
   if (debt > 25000) {
@@ -80,12 +38,11 @@ const getContextualTip = (state: GameState): string => {
     tipKey = 'low_savings';
   } 
   // Priority 2: Role Specific
-  else if (profile?.occupation && TIP_DATABASE[profile.occupation as keyof typeof TIP_DATABASE]) {
-    tipKey = profile.occupation as keyof typeof TIP_DATABASE;
+  else if (profile?.occupation && TIP_DATABASE[profile.occupation]) {
+    tipKey = profile.occupation;
   }
 
-  const tipObj = TIP_DATABASE[tipKey] || TIP_DATABASE['default'];
-  return tipObj[language] || tipObj['en'];
+  return getTip(tipKey, language);
 };
 
 
