@@ -9,26 +9,41 @@ const ai = new GoogleGenAI({ apiKey: apiKey });
 // Helper to get language context for the AI
 const getLangContext = (lang: Language) => {
   switch (lang) {
-    case 'hi': return "Response Language: HINDI (Devanagari script). Use simple, everyday Hindi.";
-    case 'hinglish': return "Response Language: HINGLISH (Latin script). Use the way Indian millennials chat. Casual, friendly.";
-    default: return "Response Language: ENGLISH. Simple, accessible, Indian context.";
+    case 'hi': return "Response Language: HINDI (Devanagari script). Use very simple, spoken Hindi (Bol-chal ki bhasha). No complex textbook words.";
+    case 'hinglish': return "Response Language: HINGLISH (Latin script). casual, like WhatsApp chat between Indian friends.";
+    default: return "Response Language: ENGLISH. Simple, direct, Indian English. Grade 6 reading level.";
   }
 };
 
 const SYSTEM_INSTRUCTION = `
-You are "Arth Mitra", a friendly Indian financial buddy.
-Your goal: Simulate financial consequences with DOPAMINE hits and EMOTIONAL decisions.
+You are "Arth Mitra", a game engine simulating life in rural/semi-urban India.
 
-STYLE RULES:
-1. **NO Paragraphs.** Use punchy, 1-line hooks.
-2. **Context:** Rural/Semi-urban India.
-3. **Tone:** Warm, non-judgmental, casual (like a friend).
-4. **Format:** Strict JSON.
+YOUR GOAL:
+Create relatable, easy-to-understand life scenarios that test financial wisdom.
 
-FINANCIAL RULES (STRICT):
-1. **Cost Consistency:** If a choice costs money (e.g. ₹500), you MUST output a negative savings impact (e.g. -500).
-2. **Debt Reality:** If the player has existing Debt, assume they pay ~2% interest per turn unless they pay it off. Increase the debt impact slightly (e.g. debt: +500) to simulate this if no payment is made.
-3. **Income:** Do NOT automatically add monthly income unless the narrative specifically says "It is Payday".
+STRICT SCENARIO GUIDELINES:
+1. **Role-Specific:** 
+   - If 'Farmer': Scenarios MUST be about rain, crops, seeds, tractors, village money-lenders.
+   - If 'Student': Scenarios MUST be about fees, exams, gadgets, friends, part-time jobs.
+   - If 'Shopkeeper': Scenarios MUST be about customers, stock, competitors, festival sales.
+   - If 'Worker': Scenarios MUST be about daily wages, health, factory shifts, family needs.
+
+2. **Simplicity (Crucial):**
+   - Use SHORT sentences.
+   - NO complex financial jargon. (Don't say "Liquidity Crisis", say "No cash in pocket").
+   - NO long paragraphs.
+
+3. **Topics:**
+   - Focus on: Family pressure (Weddings/Gifts), Health scares, Education costs, Showing off to neighbors, and unexpected bad luck.
+
+4. **Financial Rules:**
+   - If a choice costs money, the savings impact MUST be negative.
+   - Debt grows if ignored.
+   - "Expensive" choice = High dopamine/Status but bad for wallet.
+   - "Balanced" choice = Prudent but boring.
+   - "Cheap" choice = Saves money but might hurt Happiness/Health/Status.
+
+5. **Output Format:** Strict JSON.
 `;
 
 const responseSchema: Schema = {
@@ -37,15 +52,15 @@ const responseSchema: Schema = {
     // Feedback for the PREVIOUS action
     previous_outcome_title: {
       type: Type.STRING,
-      description: "Short celebratory or sympathetic title about the LAST choice (e.g., 'Smart Move!' or 'Ouch!'). Max 4 words.",
+      description: "Short reaction (e.g., 'Saved it!', 'Oh no!', 'Good choice').",
     },
     previous_outcome_desc: {
       type: Type.STRING,
-      description: "1-sentence explanation of the result. (e.g., 'Mom is happy, but your pockets are empty.')",
+      description: "1 simple sentence explaining the result. (e.g., 'You bought the bike, but now you can't pay rent.')",
     },
     financial_explanation: {
       type: Type.STRING,
-      description: "One strict sentence explaining money flow. Format: '[Amount] [Source] -> [Destination]'. Example: '₹5000 from Savings paid for School Fees' or '₹2000 Bonus added to Savings'.",
+      description: "Strict format: '[Amount] [Action]'. Example: '-₹5000 for Medicine' or '+₹2000 Bonus'.",
     },
     impact_on_stats: {
       type: Type.OBJECT,
@@ -61,7 +76,7 @@ const responseSchema: Schema = {
     // The NEXT Situation
     narrative_hook: {
       type: Type.STRING,
-      description: "The new situation in ONE punchy line. (e.g., 'Family wedding next week. Wallet is tight.')",
+      description: "The new situation in ONE simple sentence. (e.g., 'Your cousin is getting married and asks for a gift.')",
     },
     choices: {
       type: Type.ARRAY,
@@ -69,10 +84,10 @@ const responseSchema: Schema = {
         type: Type.OBJECT,
         properties: {
           id: { type: Type.STRING },
-          text: { type: Type.STRING, description: "Action text (e.g. 'Buy Gold Gift')" },
-          emoji: { type: Type.STRING, description: "Single emoji representing this action" },
-          cost_label: { type: Type.STRING, description: "Cost display (e.g. '₹8000' or 'Free')" },
-          tag: { type: Type.STRING, description: "Short emotional/financial summary (e.g. 'Loved | Wallet Empty')" },
+          text: { type: Type.STRING, description: "Action text (Max 6 words)" },
+          emoji: { type: Type.STRING, description: "Single emoji" },
+          cost_label: { type: Type.STRING, description: "e.g. '₹2000' or 'Free'" },
+          tag: { type: Type.STRING, description: "Short vibe check (e.g. 'Risky', 'Safe', 'Fun')" },
           type: { type: Type.STRING, enum: ['expensive', 'balanced', 'cheap'] },
         },
         required: ["id", "text", "emoji", "cost_label", "tag", "type"],
@@ -88,12 +103,19 @@ export const startSimulation = async (profile: PlayerProfile, lang: Language) =>
   
   const prompt = `
     START NEW GAME.
-    Player: ${profile.name}, Role: ${profile.occupation}, Income: ₹${profile.monthlyIncome}.
+    Context: Rural/Semi-Urban India.
+    Player: ${profile.name}
+    Role: ${profile.occupation}
+    Income: ₹${profile.monthlyIncome}
+    
     ${langInstruction}
     
-    1. Introduce the first situation (narrative_hook).
-    2. Provide 3 choices.
-    3. Since it's the start, 'previous_outcome_title', 'previous_outcome_desc', 'financial_explanation' should be empty string, and 'impact_on_stats' values should be 0.
+    Task:
+    1. Create the very first scenario typical for a ${profile.occupation}.
+    2. It should be a common day-to-day decision (e.g., buying tools, paying fees, or a festival bonus).
+    3. Keep it simple and relatable.
+    
+    Note: Since it's the start, 'previous_outcome' fields should be empty/neutral, and impacts 0.
   `;
 
   try {
@@ -124,26 +146,38 @@ export const nextTurn = async (
 ) => {
   const langInstruction = getLangContext(currentState.language);
 
+  // Dynamic context flags to guide the AI
+  const income = currentState.profile?.monthlyIncome || 15000;
+  let statusFlags = "";
+  if (currentState.debt > income * 4) statusFlags += "CRITICAL: DEBT IS VERY HIGH. COLLECTORS ARE CHASING. ";
+  if (currentState.health < 30) statusFlags += "CRITICAL: HEALTH IS FAILING. EXPENSIVE MEDICAL BILLS LIKELY. ";
+  if (currentState.happiness < 30) statusFlags += "WARNING: VERY SAD/DEPRESSED. NEEDS FUN. ";
+  if (currentState.savings < 1000) statusFlags += "WARNING: BROKE (NO CASH). ";
+
   const prompt = `
     ${langInstruction}
-    Current Status:
+    
+    Current Player Status:
     - Role: ${currentState.profile?.occupation}
     - Savings: ₹${currentState.savings}
     - Debt: ₹${currentState.debt}
     - Happiness: ${currentState.happiness}
     - Health: ${currentState.health}
     - Turn: ${currentState.turn}
+    
+    Flags: ${statusFlags}
 
-    Player Action: "${choiceText}" (Cost/Label: ${choiceCostLabel || 'N/A'}).
-    Previous Scenario: "${currentState.currentEvent?.narrative_hook}".
+    Player just chose: "${choiceText}" (Cost: ${choiceCostLabel || 'N/A'}).
+    Previous Scenario was: "${currentState.currentEvent?.narrative_hook}".
 
-    1. Calculate IMPACT of this action (Feedback). 
-       IMPORTANT: If the action had a cost (e.g. ₹500), you MUST SUBTRACT that amount from 'savings' in 'impact_on_stats' (e.g. savings: -500).
-    2. Generate 'financial_explanation': BE SPECIFIC and ACCURATE to the numbers.
-    3. Generate 'previous_outcome_title' (e.g. "Great job!", "Risky!", "Family is sad").
-    4. Generate 'previous_outcome_desc'.
-    5. Create the NEXT Situation ('narrative_hook') - Make it different from the last one.
-    6. Provide 3 new choices.
+    Task:
+    1. **Feedback:** Briefly describe the result of their choice. Did it work? Was it a scam? Are they happy?
+    2. **Next Scenario:** Create the next logical event.
+       - If ${statusFlags} is present, the next event MUST be related to that crisis.
+       - If everything is fine, introduce a new life event (Festival, Family Visit, Appliance breakdown, Job opportunity).
+       - Ensure the scenario fits a '${currentState.profile?.occupation}' in India.
+    
+    3. **Choices:** Provide 3 clear options (Expensive/Flashy, Balanced/Smart, Cheap/Risky).
   `;
 
   try {
