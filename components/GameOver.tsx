@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { GameState } from '../types';
 import { getTranslation } from '../translations';
-import { RefreshCcw, Trophy, AlertTriangle, Skull, Frown } from 'lucide-react';
+import { RefreshCcw, Trophy, AlertTriangle, Skull, Frown, Lightbulb, TrendingUp } from 'lucide-react';
 import { playSound } from '../services/audioService';
 
 interface GameOverProps {
@@ -75,27 +75,53 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
       break;
   }
 
+  // Get Role specific tip for Debt
+  const role = state.profile?.occupation || 'Worker';
+  const tipKey = `tip_debt_${role}`;
+  // Fallback to default if role specific tip not found (though we added all roles)
+  const tipText = t(tipKey).startsWith('tip_') ? t('tip_debt_default') : t(tipKey);
+
   const handleRestartClick = () => {
     playSound('click');
     onRestart();
   };
   
   return (
-    <div className="flex flex-col gap-8 text-center animate-fade-in pb-12 glass-card rounded-[32px] p-8">
-      <div className={`w-28 h-28 rounded-full flex items-center justify-center mx-auto shadow-inner border-4 ${colorClass}`}>
+    <div className="flex flex-col gap-6 text-center animate-fade-in pb-12 glass-card rounded-[32px] p-6 sm:p-8">
+      <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center mx-auto shadow-inner border-4 ${colorClass}`}>
         {icon}
       </div>
 
-      <div className="space-y-4">
-        <h2 className="text-h1 text-brand">
+      <div className="space-y-2 sm:space-y-4">
+        <h2 className="text-h1 text-brand leading-tight">
           {title}
         </h2>
-        <p className="text-body text-neutral-soft leading-relaxed">
+        <p className="text-body text-neutral-soft leading-relaxed px-2">
           {body}
         </p>
       </div>
 
-      <div className="bg-white/50 backdrop-blur-sm p-6 rounded-card border border-white/60 grid grid-cols-2 gap-4">
+      {/* RECOVERY TRICK CARD - Only show if Bankrupt */}
+      {reason === 'debt' && (
+        <div className="bg-white/80 border border-brand/20 p-5 rounded-2xl text-left shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-accent-yellow/10 rounded-bl-full -mr-2 -mt-2"></div>
+          <div className="relative z-10">
+             <h4 className="text-caption font-bold text-brand uppercase tracking-wider flex items-center gap-2 mb-2">
+               {t('tip_title')}
+             </h4>
+             <div className="flex gap-3 items-start">
+                <div className="bg-accent-yellow/20 p-2 rounded-full shrink-0 text-brand-dark mt-0.5">
+                   <TrendingUp size={18} strokeWidth={2.5} />
+                </div>
+                <p className="text-body font-medium text-neutral-dark leading-snug">
+                  {tipText}
+                </p>
+             </div>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white/50 backdrop-blur-sm p-4 sm:p-6 rounded-card border border-white/60 grid grid-cols-2 gap-3 sm:gap-4">
         <div className="p-2">
           <div className="text-caption text-neutral-soft uppercase tracking-widest font-bold mb-1">{t('savings')}</div>
           <div className="text-h3 font-bold text-neutral-dark">₹{state.savings.toLocaleString()}</div>
