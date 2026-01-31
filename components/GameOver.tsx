@@ -149,6 +149,10 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
           <div className="text-caption text-neutral-soft uppercase tracking-widest font-bold mb-1">{t('health')}</div>
           <div className="text-h3 font-bold text-neutral-dark">{state.health}%</div>
         </div>
+         <div className="p-2 col-span-2 sm:col-span-1 sm:col-start-1 sm:col-end-3">
+          <div className="text-caption text-neutral-soft uppercase tracking-widest font-bold mb-1">{t('relationships')}</div>
+          <div className="text-h3 font-bold text-neutral-dark">{state.relationships || 50}%</div>
+        </div>
       </div>
 
       <button

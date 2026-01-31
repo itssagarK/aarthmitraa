@@ -56,6 +56,7 @@ const initialState: GameState = {
   debt: 0,
   happiness: 80,
   health: 80,
+  relationships: 50, // Neutral start
   turn: 1,
   history: [],
   statHistory: [],
@@ -90,6 +91,10 @@ const App: React.FC = () => {
   const handleContinueGame = () => {
     const savedState = loadGame();
     if (savedState) {
+      // Data migration for old saves that lack 'relationships'
+      if (typeof savedState.relationships === 'undefined') {
+        savedState.relationships = 50;
+      }
       setGameState(savedState);
     }
   };
@@ -103,7 +108,8 @@ const App: React.FC = () => {
       profile, 
       isLoading: true,
       // Initialize savings based on occupation
-      savings: OCCUPATIONS.find(o => o.id === profile.occupation)?.baseSavings || 5000
+      savings: OCCUPATIONS.find(o => o.id === profile.occupation)?.baseSavings || 5000,
+      relationships: 50
     }));
 
     try {
@@ -141,6 +147,7 @@ const App: React.FC = () => {
         const impactDebt = safeParseInt(impacts.debt);
         const impactHappiness = safeParseInt(impacts.happiness);
         const impactHealth = safeParseInt(impacts.health);
+        const impactRelationships = safeParseInt(impacts.relationships) || 0;
 
         let newSavings = prev.savings + impactSavings;
         let newDebt = prev.debt + impactDebt;
@@ -160,15 +167,18 @@ const App: React.FC = () => {
 
         let newHappiness = prev.happiness + impactHappiness;
         let newHealth = prev.health + impactHealth;
+        let newRelationships = (prev.relationships || 50) + impactRelationships;
         
         newHappiness = Math.min(100, Math.max(0, newHappiness));
         newHealth = Math.min(100, Math.max(0, newHealth));
+        newRelationships = Math.min(100, Math.max(0, newRelationships));
 
         // 3. Record history (Actual delta after normalization)
         const actualChangeSavings = newSavings - prev.savings;
         const actualChangeDebt = newDebt - prev.debt;
         const actualChangeHappiness = newHappiness - prev.happiness;
         const actualChangeHealth = newHealth - prev.health;
+        const actualChangeRelationships = newRelationships - (prev.relationships || 50);
 
         const newTransaction = {
           turn: prev.turn,
@@ -177,7 +187,8 @@ const App: React.FC = () => {
             savings: actualChangeSavings,
             debt: actualChangeDebt,
             happiness: actualChangeHappiness,
-            health: actualChangeHealth
+            health: actualChangeHealth,
+            relationships: actualChangeRelationships
           }
         };
 
@@ -188,6 +199,7 @@ const App: React.FC = () => {
           debt: newDebt,
           happiness: newHappiness,
           health: newHealth,
+          relationships: newRelationships,
           turn: prev.turn + 1,
           statHistory: [...prev.statHistory, newTransaction],
           lastEventData: resultData, 

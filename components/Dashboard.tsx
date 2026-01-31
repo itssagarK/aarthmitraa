@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GameState } from '../types';
 import { getTranslation } from '../translations';
-import { IndianRupee, Heart, Smile, TrendingDown, TrendingUp } from 'lucide-react';
+import { IndianRupee, Heart, Smile, TrendingDown, TrendingUp, Users } from 'lucide-react';
 import { StatHistory } from './StatHistory';
 import { playSound } from '../services/audioService';
 
@@ -95,7 +95,7 @@ const StatChip: React.FC<StatChipProps> = ({
   }, [value, isHighGood]);
 
   // Dynamic classes
-  const baseClasses = "flex flex-col items-center justify-center p-3 rounded-chip min-w-[90px] min-h-[70px] backdrop-blur-md shadow-sm transition-all duration-300 active:scale-95 cursor-pointer hover:bg-white border flex-1 group relative overflow-hidden";
+  const baseClasses = "flex flex-col items-center justify-center p-3 rounded-chip min-w-[70px] sm:min-w-[90px] min-h-[70px] backdrop-blur-md shadow-sm transition-all duration-300 active:scale-95 cursor-pointer hover:bg-white border flex-1 group relative overflow-hidden";
   
   let stateClasses = "bg-white/80 border-white/60";
   let iconColor = baseIconColor;
@@ -119,7 +119,7 @@ const StatChip: React.FC<StatChipProps> = ({
       <div className={`relative z-10 flex items-center gap-1 mb-1 transition-colors duration-300 ${iconColor}`}>
          {icon}
       </div>
-      <span className="relative z-10 text-[10px] font-bold uppercase text-neutral-soft tracking-wider">{label}</span>
+      <span className="relative z-10 text-[9px] sm:text-[10px] font-bold uppercase text-neutral-soft tracking-wider text-center leading-tight">{label}</span>
       <span className="relative z-10 text-h3 text-neutral-dark mt-0.5">
          <AnimatedCounter value={value} formatter={formatter} />
       </span>
@@ -128,7 +128,7 @@ const StatChip: React.FC<StatChipProps> = ({
 };
 
 export const Dashboard: React.FC<DashboardProps> = ({ state }) => {
-  const [selectedStat, setSelectedStat] = useState<'savings' | 'debt' | 'happiness' | 'health' | null>(null);
+  const [selectedStat, setSelectedStat] = useState<'savings' | 'debt' | 'happiness' | 'health' | 'relationships' | null>(null);
   
   const t = (key: any) => getTranslation(state.language, key);
 
@@ -146,7 +146,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ state }) => {
     return `${Math.round(val)}%`;
   };
   
-  const handleStatClick = (stat: 'savings' | 'debt' | 'happiness' | 'health') => {
+  const handleStatClick = (stat: 'savings' | 'debt' | 'happiness' | 'health' | 'relationships') => {
     playSound('click');
     setSelectedStat(stat);
   };
@@ -160,7 +160,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ state }) => {
         - Strong background to hide scrolling content
       */}
       <div className="sticky top-0 z-40 -mx-4 px-4 pt-4 pb-4 overflow-x-auto scrollbar-hide bg-[#f0fdf9]/95 backdrop-blur-md border-b border-white/20 shadow-sm transition-all">
-        <div className="flex gap-3 w-max mx-auto sm:w-full sm:mx-0 justify-between sm:justify-center">
+        <div className="flex gap-2 sm:gap-3 w-full justify-between">
           
           <StatChip 
             label={t('savings')} 
@@ -199,6 +199,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ state }) => {
             onClick={() => handleStatClick('health')}
             icon={<Heart className="w-4 h-4 fill-current" />}
             baseIconColor="text-accent-pink"
+            isHighGood={true}
+          />
+
+          <StatChip 
+            label={t('relationships')} 
+            value={state.relationships || 50} 
+            formatter={percentageFormatter}
+            onClick={() => handleStatClick('relationships')}
+            icon={<Users className="w-4 h-4" strokeWidth={2.5} />}
+            baseIconColor="text-accent-purple"
             isHighGood={true}
           />
 

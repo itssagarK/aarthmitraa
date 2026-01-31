@@ -70,6 +70,7 @@ export const UI_TEXT = {
   debt: { en: "Debt", hi: "कर्ज", hinglish: "Udhaar" },
   happiness: { en: "Joy", hi: "खुशी", hinglish: "Khushi" },
   health: { en: "Health", hi: "सेहत", hinglish: "Health" },
+  relationships: { en: "Relations", hi: "संबंध", hinglish: "Rishte" },
   
   game_over_win: {
     en: "Journey Completed!",

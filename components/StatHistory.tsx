@@ -1,9 +1,9 @@
 import React from 'react';
 import { StatTransaction } from '../types';
-import { X, IndianRupee, TrendingUp, Smile, Heart, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { X, IndianRupee, TrendingUp, Smile, Heart, ArrowUpRight, ArrowDownRight, Users } from 'lucide-react';
 
 interface StatHistoryProps {
-  type: 'savings' | 'debt' | 'happiness' | 'health';
+  type: 'savings' | 'debt' | 'happiness' | 'health' | 'relationships';
   history: StatTransaction[];
   onClose: () => void;
   title: string;
@@ -11,7 +11,8 @@ interface StatHistoryProps {
 
 export const StatHistory: React.FC<StatHistoryProps> = ({ type, history, onClose, title }) => {
   // Filter history to only show transactions where the specific stat changed
-  const filteredHistory = history.filter(t => t.changes[type] !== 0).reverse();
+  // Handle undefined relationships for old saves safely
+  const filteredHistory = history.filter(t => (t.changes[type] || 0) !== 0).reverse();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -31,6 +32,7 @@ export const StatHistory: React.FC<StatHistoryProps> = ({ type, history, onClose
             {type === 'debt' && <TrendingUp className="w-5 h-5 text-accent-red" />}
             {type === 'happiness' && <Smile className="w-5 h-5 text-accent-yellow" />}
             {type === 'health' && <Heart className="w-5 h-5 text-accent-pink" />}
+            {type === 'relationships' && <Users className="w-5 h-5 text-accent-purple" />}
             {title} History
           </h3>
           <button 
@@ -49,7 +51,7 @@ export const StatHistory: React.FC<StatHistoryProps> = ({ type, history, onClose
             </div>
           ) : (
             filteredHistory.map((item, index) => {
-              const change = item.changes[type];
+              const change = item.changes[type] || 0;
               const isIncrease = change > 0;
               
               // Determine if the change is "Good" for the player
@@ -83,7 +85,7 @@ export const StatHistory: React.FC<StatHistoryProps> = ({ type, history, onClose
                   
                   {/* Value */}
                   <div className={`text-h3 font-bold ${colorClass} whitespace-nowrap ml-1`}>
-                    {change > 0 ? '+' : ''}{change}{type === 'happiness' || type === 'health' ? '%' : ''}
+                    {change > 0 ? '+' : ''}{change}{type === 'savings' || type === 'debt' ? '' : '%'}
                   </div>
                 </div>
               );

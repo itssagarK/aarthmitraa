@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { GameEvent, Language } from '../types';
 import { getTranslation } from '../translations';
-import { TrendingUp, TrendingDown, Heart, Smile, ArrowRight, IndianRupee, Info, ChevronDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Heart, Smile, ArrowRight, IndianRupee, Info, ChevronDown, Users } from 'lucide-react';
 import { playSound } from '../services/audioService';
 
 interface FeedbackViewProps {
@@ -19,8 +19,8 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
     if (!impacts) return;
     
     // Play sound based on result
-    const isBadOutcome = (impacts.debt > 500) || (impacts.happiness < -5) || (impacts.health < -5);
-    const isGoodOutcome = (impacts.savings > 0) || (impacts.happiness > 5);
+    const isBadOutcome = (impacts.debt > 500) || (impacts.happiness < -5) || (impacts.health < -5) || (impacts.relationships < -5);
+    const isGoodOutcome = (impacts.savings > 0) || (impacts.happiness > 5) || (impacts.relationships > 5);
 
     if (isBadOutcome) {
       playSound('error');
@@ -48,6 +48,9 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
   const handleToggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
+
+  // Safe check for relationships since it might not exist in old events if not migrated
+  const relImpact = impacts.relationships || 0;
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in justify-center w-full min-h-full">
@@ -125,6 +128,17 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
           </div>
         )}
         
+        {/* Relationships Impact */}
+        {relImpact !== 0 && (
+          <div className={`p-4 rounded-card border flex flex-col items-center justify-center bg-white/70 shadow-sm ${relImpact > 0 ? 'border-accent-purple/50' : 'border-accent-red/50'}`}>
+            <span className="text-caption font-bold uppercase text-neutral-soft mb-1">{t('relationships')}</span>
+             <div className={`text-h3 font-bold flex items-center ${relImpact > 0 ? 'text-accent-purple' : 'text-accent-red'}`}>
+              <Users className="w-5 h-5 mr-1" />
+              {relImpact > 0 ? '+' : ''}{relImpact}%
+            </div>
+          </div>
+        )}
+
          {/* Debt Impact */}
          {impacts.debt !== 0 && (
           <div className={`p-4 rounded-card border flex flex-col items-center justify-center bg-white/70 shadow-sm ${impacts.debt < 0 ? 'border-accent-green/50' : 'border-accent-red/50'}`}>

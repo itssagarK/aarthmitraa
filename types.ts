@@ -21,6 +21,7 @@ export interface StatImpact {
   debt: number;
   happiness: number;
   health: number;
+  relationships: number;
 }
 
 export interface GameEvent {
@@ -50,6 +51,7 @@ export interface GameState {
   debt: number;
   happiness: number;
   health: number;
+  relationships: number;
   
   turn: number;
   history: string[]; // Narrative history

@@ -41,7 +41,7 @@ STRICT SCENARIO GUIDELINES:
    - Debt grows if ignored.
    - "Expensive" choice = High dopamine/Status but bad for wallet.
    - "Balanced" choice = Prudent but boring.
-   - "Cheap" choice = Saves money but might hurt Happiness/Health/Status.
+   - "Cheap" choice = Saves money but might hurt Happiness/Health/Status/Relationships.
 
 5. **Output Format:** Strict JSON.
 `;
@@ -69,8 +69,9 @@ const responseSchema: Schema = {
         debt: { type: Type.INTEGER },
         happiness: { type: Type.INTEGER },
         health: { type: Type.INTEGER },
+        relationships: { type: Type.INTEGER },
       },
-      required: ["savings", "debt", "happiness", "health"],
+      required: ["savings", "debt", "happiness", "health", "relationships"],
     },
     
     // The NEXT Situation
@@ -152,6 +153,7 @@ export const nextTurn = async (
   if (currentState.debt > income * 4) statusFlags += "CRITICAL: DEBT IS VERY HIGH. COLLECTORS ARE CHASING. ";
   if (currentState.health < 30) statusFlags += "CRITICAL: HEALTH IS FAILING. EXPENSIVE MEDICAL BILLS LIKELY. ";
   if (currentState.happiness < 30) statusFlags += "WARNING: VERY SAD/DEPRESSED. NEEDS FUN. ";
+  if (currentState.relationships < 30) statusFlags += "WARNING: LONELY/ISOLATED. FAMILY ANGRY. ";
   if (currentState.savings < 1000) statusFlags += "WARNING: BROKE (NO CASH). ";
 
   const prompt = `
@@ -163,6 +165,7 @@ export const nextTurn = async (
     - Debt: ₹${currentState.debt}
     - Happiness: ${currentState.happiness}
     - Health: ${currentState.health}
+    - Relationships: ${currentState.relationships}
     - Turn: ${currentState.turn}
     
     Flags: ${statusFlags}
