@@ -22,7 +22,7 @@ const AnimatedCounter = ({ value, formatter }: { value: number, formatter?: (v: 
     const animate = (timestamp: number) => {
       if (!startTime.current) startTime.current = timestamp;
       const progress = timestamp - startTime.current;
-      const duration = 1200; // Faster animation
+      const duration = 800; // Faster animation
       
       if (progress < duration) {
         const ease = 1 - Math.pow(2, -10 * (progress / duration));
