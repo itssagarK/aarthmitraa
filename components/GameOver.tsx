@@ -14,18 +14,19 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
   const t = (key: any) => getTranslation(state.language, key);
 
   // Dynamic Debt Thresholds
-  // Game Over if Debt > 6 months of income
-  // Survival (Yellow) if Debt > 4 months of income
+  // Game Over if Debt > 6 months of income (Critical Bankruptcy)
+  // Survival (Yellow) if Debt > 4 months of income (Heavy Burden)
   const income = state.profile?.monthlyIncome || 15000;
-  const limitDebt = income * 6;
+  const debtThreshold = income * 6;
   const warningDebt = income * 4;
 
   // Determine Game Over Reason
+  // Priority: Debt > Health > Happiness > Survival > Win
   let reason: 'win' | 'debt' | 'health' | 'happiness' | 'survival' = 'win';
   let icon = <Trophy className="w-14 h-14 text-accent-green" />;
   let colorClass = 'bg-accent-green/20 border-white';
 
-  if (state.debt > limitDebt) {
+  if (state.debt > debtThreshold) {
     reason = 'debt';
     icon = <AlertTriangle className="w-14 h-14 text-accent-red" />;
     colorClass = 'bg-accent-red/20 border-white';

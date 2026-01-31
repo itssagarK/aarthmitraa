@@ -231,15 +231,23 @@ const App: React.FC = () => {
     setGameState(prev => {
        const income = prev.profile?.monthlyIncome || 15000;
        
-       // Dynamic Debt Limit: 6 months of income is a debt trap.
-       const maxDebt = income * 6;
-       
+       // GAME OVER LOGIC
+       // 1. Debt Threshold: > 6 months of income is critical bankruptcy
+       const debtThreshold = income * 6;
+       const isHighDebt = prev.debt > debtThreshold;
+
+       // 2. Critical Stats
        const isDepressed = prev.happiness <= 5; 
        const isSick = prev.health <= 5; 
-       const isHighDebt = prev.debt > maxDebt;
+       
+       // 3. Turn Limit
        const isMaxTurns = prev.turn >= 12;
        
-       const isGameOver = isDepressed || isSick || isHighDebt || isMaxTurns || prev.lastEventData?.isGameOver;
+       // 4. Narrative Override (if AI decided game over)
+       const isNarrativeGameOver = prev.lastEventData?.isGameOver;
+
+       // Combined Check
+       const isGameOver = isHighDebt || isDepressed || isSick || isMaxTurns || isNarrativeGameOver;
 
        return {
          ...prev,
