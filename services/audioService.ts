@@ -1,74 +1,103 @@
 import { Howl, Howler } from 'howler';
 
-const STORAGE_KEY_MUTE = 'arth_mitra_muted';
+const STORAGE_KEY_SFX = 'arth_mitra_sfx_vol';
+const STORAGE_KEY_MUSIC = 'arth_mitra_bgm_vol';
 
-// Initialize global mute state
-const initialMute = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY_MUTE) === 'true' : false;
-Howler.mute(initialMute);
+// --- INITIALIZATION ---
+// Get saved volumes or default to 0.5 (50%)
+const getSavedVol = (key: string) => {
+  if (typeof localStorage !== 'undefined') {
+    const saved = localStorage.getItem(key);
+    return saved !== null ? parseFloat(saved) : 0.5;
+  }
+  return 0.5;
+};
+
+let currentSfxVol = getSavedVol(STORAGE_KEY_SFX);
+let currentMusicVol = getSavedVol(STORAGE_KEY_MUSIC);
 
 // Initialize sounds with reliable CDN URLs
-// Using Mixkit free preview assets for UI sounds
 const soundAssets = {
   // Soft pop/click for UI interactions
   click: new Howl({ 
     src: ['https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'], 
-    volume: 0.3,
     preload: true
   }),
   // Pleasant chime for positive outcomes
   success: new Howl({ 
     src: ['https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'], 
-    volume: 0.3,
     preload: true
   }),
   // Low thud/tone for negative outcomes
   error: new Howl({ 
     src: ['https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3'], 
-    volume: 0.3,
     preload: true
   }),
   // Celebratory tune for game win
   win: new Howl({ 
     src: ['https://assets.mixkit.co/active_storage/sfx/2020/2020-preview.mp3'], 
-    volume: 0.5,
     preload: true
   }),
   // Sad/Somber tune for game loss
   lose: new Howl({ 
     src: ['https://assets.mixkit.co/active_storage/sfx/290/290-preview.mp3'], 
-    volume: 0.5,
     preload: true
   }),
+  // Calm ambient background music
+  bgm: new Howl({
+    src: ['https://assets.mixkit.co/active_storage/sfx/131/131-preview.mp3'], // Calm nature/birds/guitar ambience
+    html5: true, // Use HTML5 Audio for larger files (streaming)
+    loop: true,
+    volume: currentMusicVol
+  })
 };
 
-export type SoundType = keyof typeof soundAssets;
+export type SoundType = keyof Omit<typeof soundAssets, 'bgm'>;
+
+// --- SFX METHODS ---
 
 export const playSound = (type: SoundType) => {
   try {
-    // Stop previous instance of the same sound to prevent overlap if clicked rapidly
-    // mostly relevant for UI clicks
+    const sound = soundAssets[type];
+    
+    // Stop previous instance if it's a UI click to prevent buildup
     if (type === 'click') {
-        // Optional: randomness to pitch for organic feel
-        soundAssets[type].rate(0.9 + Math.random() * 0.2); 
+        sound.rate(0.9 + Math.random() * 0.2); // Organic variation
     } else {
-        soundAssets[type].rate(1.0);
+        sound.rate(1.0);
     }
     
-    soundAssets[type].play();
+    // Set volume specifically for this play instance based on global SFX setting
+    sound.volume(currentSfxVol);
+    sound.play();
   } catch (error) {
     console.warn('Audio playback failed:', error);
   }
 };
 
-export const toggleMute = (): boolean => {
-  const currentState = localStorage.getItem(STORAGE_KEY_MUTE) === 'true';
-  const newState = !currentState;
-  Howler.mute(newState);
-  localStorage.setItem(STORAGE_KEY_MUTE, String(newState));
-  return newState;
+export const setSfxVolume = (vol: number) => {
+  currentSfxVol = Math.max(0, Math.min(1, vol));
+  localStorage.setItem(STORAGE_KEY_SFX, currentSfxVol.toString());
 };
 
-export const isMuted = (): boolean => {
-  if (typeof localStorage === 'undefined') return false;
-  return localStorage.getItem(STORAGE_KEY_MUTE) === 'true';
+export const getSfxVolume = () => currentSfxVol;
+
+// --- MUSIC METHODS ---
+
+export const initMusic = () => {
+    // Browsers require interaction before playing audio. 
+    // Call this on the first user click/interaction.
+    if (!soundAssets.bgm.playing()) {
+        soundAssets.bgm.volume(currentMusicVol);
+        soundAssets.bgm.play();
+        soundAssets.bgm.fade(0, currentMusicVol, 2000); // Fade in
+    }
 };
+
+export const setMusicVolume = (vol: number) => {
+  currentMusicVol = Math.max(0, Math.min(1, vol));
+  soundAssets.bgm.volume(currentMusicVol);
+  localStorage.setItem(STORAGE_KEY_MUSIC, currentMusicVol.toString());
+};
+
+export const getMusicVolume = () => currentMusicVol;

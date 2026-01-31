@@ -138,6 +138,28 @@ export const UI_TEXT = {
     en: "💡 Bounce Back Strategy",
     hi: "💡 वापसी का तरीका",
     hinglish: "💡 Paisa Wapas Kamane Ka Trick"
+  },
+
+  // --- SETTINGS ---
+  settings_title: {
+    en: "Settings",
+    hi: "सेटिंग्स",
+    hinglish: "Settings"
+  },
+  music_volume: {
+    en: "Music",
+    hi: "संगीत",
+    hinglish: "Music"
+  },
+  sfx_volume: {
+    en: "Sound FX",
+    hi: "आवाज़ें",
+    hinglish: "Sound FX"
+  },
+  close: {
+    en: "Close",
+    hi: "बंद करें",
+    hinglish: "Band Karein"
   }
 };
 

@@ -6,10 +6,12 @@ import { ScenarioView } from './components/ScenarioView';
 import { FeedbackView } from './components/FeedbackView';
 import { GameOver } from './components/GameOver';
 import { FinancialTipCard } from './components/FinancialTipCard';
+import { SettingsModal } from './components/SettingsModal';
 import { GameState, PlayerProfile, Choice, Language, OCCUPATIONS } from './types';
 import { startSimulation, nextTurn } from './services/geminiService';
 import { saveGame, loadGame, clearSave, getSavedGameMeta } from './services/storageService';
 import { TIP_DATABASE, getTip } from './data/tips';
+import { initMusic } from './services/audioService';
 
 // --- UTILS ---
 const safeParseInt = (val: any): number => {
@@ -70,6 +72,7 @@ const initialState: GameState = {
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(initialState);
   const [savedGameMeta, setSavedGameMeta] = useState<any>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Check for save on mount
   useEffect(() => {
@@ -84,11 +87,17 @@ const App: React.FC = () => {
     }
   }, [gameState]);
 
+  // Attempt to initialize music on first interaction (handled by header clicks or game start)
+  const ensureMusicPlaying = () => {
+    initMusic();
+  };
+
   const handleLanguageChange = (lang: Language) => {
     setGameState(prev => ({ ...prev, language: lang }));
   };
 
   const handleContinueGame = () => {
+    ensureMusicPlaying();
     const savedState = loadGame();
     if (savedState) {
       // Data migration for old saves that lack 'relationships'
@@ -100,6 +109,7 @@ const App: React.FC = () => {
   };
 
   const handleStartGame = async (profile: PlayerProfile) => {
+    ensureMusicPlaying();
     // Clear any previous save when starting fresh
     clearSave();
     
@@ -263,8 +273,19 @@ const App: React.FC = () => {
 
       {/* Header: Static, safe from overlap */}
       <div className="relative z-50 flex-none border-b border-white/20 shadow-sm bg-white/40 backdrop-blur-md">
-        <Header language={gameState.language} onLanguageChange={handleLanguageChange} />
+        <Header 
+          language={gameState.language} 
+          onLanguageChange={handleLanguageChange} 
+          onOpenSettings={() => setIsSettingsOpen(true)}
+        />
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        language={gameState.language} 
+      />
 
       {/* Scrollable Main Area: Content pushes naturally */}
       <main className="relative z-0 flex-1 overflow-y-auto overflow-x-hidden w-full scroll-smooth">

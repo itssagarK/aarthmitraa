@@ -1,29 +1,25 @@
-import React, { useState } from 'react';
-import { Wallet, Volume2, VolumeX } from 'lucide-react';
+import React from 'react';
+import { Wallet, Settings } from 'lucide-react';
 import { Language } from '../types';
 import { getTranslation } from '../translations';
-import { toggleMute, isMuted, playSound } from '../services/audioService';
+import { playSound } from '../services/audioService';
 
 interface HeaderProps {
   language: Language;
   onLanguageChange: (lang: Language) => void;
+  onOpenSettings: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ language, onLanguageChange }) => {
-  const [muted, setMuted] = useState(isMuted());
-
+export const Header: React.FC<HeaderProps> = ({ language, onLanguageChange, onOpenSettings }) => {
   const languages: { code: Language; label: string }[] = [
     { code: 'en', label: 'En' },
     { code: 'hi', label: 'Hi' },
     { code: 'hinglish', label: 'Hng' },
   ];
 
-  const handleMuteToggle = () => {
-    const newState = toggleMute();
-    setMuted(newState);
-    if (!newState) {
-        playSound('click');
-    }
+  const handleSettingsClick = () => {
+    playSound('click');
+    onOpenSettings();
   };
 
   return (
@@ -42,13 +38,13 @@ export const Header: React.FC<HeaderProps> = ({ language, onLanguageChange }) =>
 
         {/* Actions Group */}
         <div className="flex items-center gap-3">
-            {/* Mute Toggle */}
+            {/* Settings Button */}
             <button
-                onClick={handleMuteToggle}
+                onClick={handleSettingsClick}
                 className="w-9 h-9 rounded-full bg-neutral-glass border border-white/40 flex items-center justify-center text-neutral-soft hover:bg-brand hover:text-white transition-all shadow-sm active:scale-95"
-                aria-label={muted ? "Unmute" : "Mute"}
+                aria-label="Settings"
             >
-                {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                <Settings size={18} />
             </button>
 
             {/* Language Switcher */}
