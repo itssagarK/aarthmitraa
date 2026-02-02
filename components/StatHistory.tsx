@@ -1,6 +1,6 @@
 import React from 'react';
 import { StatTransaction } from '../types';
-import { X, IndianRupee, TrendingUp, Smile, Heart, ArrowUpRight, ArrowDownRight, Users } from 'lucide-react';
+import { X, IndianRupee, TrendingUp, TrendingDown, Smile, Heart, Users, Plus, Minus } from 'lucide-react';
 
 interface StatHistoryProps {
   type: 'savings' | 'debt' | 'happiness' | 'health' | 'relationships';
@@ -55,25 +55,30 @@ export const StatHistory: React.FC<StatHistoryProps> = ({ type, history, onClose
               const isIncrease = change > 0;
               
               // Determine if the change is "Good" for the player
-              // Debt going UP is BAD. Debt going DOWN is GOOD.
-              // Everything else going UP is GOOD.
               let isGood = false;
               if (type === 'debt') {
-                isGood = !isIncrease; 
+                isGood = !isIncrease; // Debt going DOWN is Good
               } else {
-                isGood = isIncrease;
+                isGood = isIncrease; // Others going UP is Good
               }
 
               const colorClass = isGood ? "text-accent-green" : "text-accent-red";
               const bgClass = isGood ? "bg-accent-green/10" : "bg-accent-red/10";
-              const Icon = isIncrease ? ArrowUpRight : ArrowDownRight;
+              const borderClass = isGood ? "border-l-accent-green" : "border-l-accent-red";
+              
+              // Select semantic icon
+              let Icon = isIncrease ? TrendingUp : TrendingDown;
+              // For money, use Plus/Minus for clarity
+              if (type === 'savings' || type === 'debt') {
+                 Icon = isIncrease ? Plus : Minus;
+              }
 
               return (
-                <div key={index} className="flex items-center justify-between p-3 rounded-2xl bg-white border border-neutral-100 shadow-sm">
+                <div key={index} className={`flex items-center justify-between p-3 pl-4 rounded-xl bg-white border border-neutral-100 shadow-sm border-l-4 ${borderClass}`}>
                   <div className="flex items-center gap-3 overflow-hidden">
                     {/* Icon Indicator */}
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${bgClass} ${colorClass}`}>
-                       <Icon className="w-5 h-5" strokeWidth={2.5} />
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${bgClass} ${colorClass}`}>
+                       <Icon className="w-4 h-4" strokeWidth={3} />
                     </div>
 
                     {/* Description */}
@@ -84,7 +89,7 @@ export const StatHistory: React.FC<StatHistoryProps> = ({ type, history, onClose
                   </div>
                   
                   {/* Value */}
-                  <div className={`text-h3 font-bold ${colorClass} whitespace-nowrap ml-1`}>
+                  <div className={`text-h3 font-bold ${colorClass} whitespace-nowrap ml-2`}>
                     {change > 0 ? '+' : ''}{change}{type === 'savings' || type === 'debt' ? '' : '%'}
                   </div>
                 </div>
