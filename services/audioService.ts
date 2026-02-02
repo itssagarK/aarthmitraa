@@ -2,6 +2,8 @@ import { Howl, Howler } from 'howler';
 
 const STORAGE_KEY_SFX = 'arth_mitra_sfx_vol';
 const STORAGE_KEY_MUSIC = 'arth_mitra_bgm_vol';
+const STORAGE_KEY_LAST_SFX = 'arth_mitra_last_sfx_vol';
+const STORAGE_KEY_LAST_MUSIC = 'arth_mitra_last_bgm_vol';
 
 // --- INITIALIZATION ---
 // Get saved volumes or default to 0.5 (50%)
@@ -82,6 +84,21 @@ export const setSfxVolume = (vol: number) => {
 
 export const getSfxVolume = () => currentSfxVol;
 
+export const toggleMuteSfx = (): number => {
+  const current = getSfxVolume();
+  if (current > 0) {
+    localStorage.setItem(STORAGE_KEY_LAST_SFX, current.toString());
+    setSfxVolume(0);
+    return 0;
+  } else {
+    const saved = localStorage.getItem(STORAGE_KEY_LAST_SFX);
+    const restore = saved ? parseFloat(saved) : 0.5;
+    const final = restore > 0 ? restore : 0.5;
+    setSfxVolume(final);
+    return final;
+  }
+};
+
 // --- MUSIC METHODS ---
 
 export const initMusic = () => {
@@ -101,3 +118,18 @@ export const setMusicVolume = (vol: number) => {
 };
 
 export const getMusicVolume = () => currentMusicVol;
+
+export const toggleMuteMusic = (): number => {
+  const current = getMusicVolume();
+  if (current > 0) {
+    localStorage.setItem(STORAGE_KEY_LAST_MUSIC, current.toString());
+    setMusicVolume(0);
+    return 0;
+  } else {
+    const saved = localStorage.getItem(STORAGE_KEY_LAST_MUSIC);
+    const restore = saved ? parseFloat(saved) : 0.5;
+    const final = restore > 0 ? restore : 0.5;
+    setMusicVolume(final);
+    return final;
+  }
+};
