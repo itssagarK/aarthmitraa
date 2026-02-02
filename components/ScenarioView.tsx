@@ -33,8 +33,8 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({ event, onMakeChoice,
   return (
     <div className="flex flex-col gap-8 w-full">
       
-      {/* 1. Story Card */}
-      <div className="glass-card p-6 rounded-card text-center sm:text-left w-full shadow-lg border-white/60">
+      {/* 1. Story Card - Pop In Animation */}
+      <div className="glass-card p-6 rounded-card text-center sm:text-left w-full shadow-lg border-white/60 animate-fade-in-up opacity-0">
         <p className="text-h2 text-brand leading-snug">
           {event.narrative_hook}
         </p>
@@ -42,7 +42,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({ event, onMakeChoice,
 
       {/* 2. Choices */}
       <div className="flex flex-col gap-4 w-full">
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-1 animate-fade-in" style={{ animationDelay: '200ms' }}>
            <span className="text-caption font-bold uppercase text-neutral-soft tracking-widest">
              {t('select_role') === 'Select your role' ? 'Your Choice' : 'आपका फैसला'}
            </span>
@@ -57,7 +57,7 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({ event, onMakeChoice,
             - Added min-h to prevent collapse
         */}
         <div className="flex overflow-x-auto gap-4 px-1 pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide sm:grid sm:grid-cols-1 sm:gap-4 sm:overflow-visible sm:px-0 sm:mx-0 sm:pb-0">
-          {event.choices.map((choice) => {
+          {event.choices.map((choice, index) => {
             
             let accentColorClass = "text-brand";
             if (choice.type === 'expensive') accentColorClass = "text-accent-red";
@@ -74,7 +74,9 @@ export const ScenarioView: React.FC<ScenarioViewProps> = ({ event, onMakeChoice,
                   rounded-choice p-5 flex flex-row justify-between items-center gap-4
                   transition-all duration-300 text-left hover:-translate-y-1 hover:shadow-btn-hover shadow-sm group
                   min-h-[120px] h-auto border border-white/40 bg-white/70
+                  opacity-0 animate-slide-in-right
                 `}
+                style={{ animationDelay: `${150 + (index * 100)}ms` }}
               >
                 {/* Left Side: Content */}
                 <div className="flex-1 min-w-0 flex flex-col gap-2">

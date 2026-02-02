@@ -14,14 +14,10 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
   const t = (key: any) => getTranslation(state.language, key);
 
   // Dynamic Debt Thresholds
-  // Game Over if Debt > 6 months of income (Critical Bankruptcy)
-  // Survival (Yellow) if Debt > 4 months of income (Heavy Burden)
   const income = state.profile?.monthlyIncome || 15000;
   const debtThreshold = income * 6;
   const warningDebt = income * 4;
 
-  // Determine Game Over Reason
-  // Priority: Debt > Health > Happiness > Survival > Win
   let reason: 'win' | 'debt' | 'health' | 'happiness' | 'survival' = 'win';
   let icon = <Trophy className="w-14 h-14 text-accent-green" />;
   let colorClass = 'bg-accent-green/20 border-white';
@@ -77,12 +73,11 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
       break;
   }
 
-  // Get Role specific tip for Debt from TIP_DATABASE
+  // Get Role specific tip
   const role = state.profile?.occupation || 'Worker';
   let tipText = '';
 
   if (reason === 'debt') {
-    // Try to get specific bankruptcy tip, fallback to default bankruptcy tip
     const bankruptcyKey = `${role}_bankruptcy`;
     if (TIP_DATABASE[bankruptcyKey]) {
       tipText = getTip(bankruptcyKey, state.language);
@@ -97,12 +92,16 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
   };
   
   return (
-    <div className="flex flex-col gap-6 text-center animate-fade-in pb-12 glass-card rounded-[32px] p-6 sm:p-8">
-      <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center mx-auto shadow-inner border-4 ${colorClass}`}>
-        {icon}
+    <div className="flex flex-col gap-6 text-center pb-12 glass-card rounded-[32px] p-6 sm:p-8 animate-fade-in">
+      
+      {/* Icon with Pop In & Bounce */}
+      <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center mx-auto shadow-inner border-4 ${colorClass} opacity-0 animate-pop-in`}>
+        <div className="animate-bounce-subtle">
+           {icon}
+        </div>
       </div>
 
-      <div className="space-y-2 sm:space-y-4">
+      <div className="space-y-2 sm:space-y-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
         <h2 className="text-h1 text-brand leading-tight">
           {title}
         </h2>
@@ -111,9 +110,9 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
         </p>
       </div>
 
-      {/* RECOVERY TRICK CARD - Only show if Bankrupt */}
+      {/* RECOVERY TRICK CARD */}
       {reason === 'debt' && (
-        <div className="bg-white/80 border border-brand/20 p-5 rounded-2xl text-left shadow-sm relative overflow-hidden group">
+        <div className="bg-white/80 border border-brand/20 p-5 rounded-2xl text-left shadow-sm relative overflow-hidden group opacity-0 animate-slide-in-right" style={{ animationDelay: '400ms' }}>
           <div className="absolute top-0 right-0 w-16 h-16 bg-accent-yellow/10 rounded-bl-full -mr-2 -mt-2"></div>
           <div className="relative z-10">
              <h4 className="text-caption font-bold text-brand uppercase tracking-wider flex items-center gap-2 mb-2">
@@ -131,7 +130,8 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
         </div>
       )}
 
-      <div className="bg-white/50 backdrop-blur-sm p-4 sm:p-6 rounded-card border border-white/60 grid grid-cols-2 gap-3 sm:gap-4">
+      {/* Stats Grid */}
+      <div className="bg-white/50 backdrop-blur-sm p-4 sm:p-6 rounded-card border border-white/60 grid grid-cols-2 gap-3 sm:gap-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '500ms' }}>
         <div className="p-2">
           <div className="text-caption text-neutral-soft uppercase tracking-widest font-bold mb-1">{t('savings')}</div>
           <div className="text-h3 font-bold text-neutral-dark">₹{state.savings.toLocaleString()}</div>
@@ -158,7 +158,8 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
 
       <button
         onClick={handleRestartClick}
-        className="w-full inline-flex items-center justify-center px-10 py-4 bg-brand text-white rounded-btn font-bold text-body hover:shadow-btn-hover transition-all transform hover:-translate-y-0.5"
+        className="w-full inline-flex items-center justify-center px-10 py-4 bg-brand text-white rounded-btn font-bold text-body hover:shadow-btn-hover transition-all transform hover:-translate-y-0.5 opacity-0 animate-fade-in"
+        style={{ animationDelay: '800ms' }}
       >
         <RefreshCcw className="w-5 h-5 mr-3" />
         {t('restart')}

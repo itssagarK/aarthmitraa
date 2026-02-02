@@ -88,11 +88,82 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
   // Safe check for relationships since it might not exist in old events if not migrated
   const relImpact = impacts.relationships || 0;
 
+  // Prepare grid items array for clean mapping and staggering
+  const gridItems = [
+    {
+      id: 'savings',
+      condition: impacts.savings !== 0,
+      render: () => (
+        <div className={`p-4 rounded-card border flex flex-col items-center justify-center bg-white/70 shadow-sm ${impacts.savings > 0 ? 'border-accent-green/50' : 'border-accent-red/50'}`}>
+          <span className="text-caption font-bold uppercase text-neutral-soft mb-1">{t('savings')}</span>
+          <div className={`text-h3 font-bold flex items-center ${impacts.savings > 0 ? 'text-accent-green' : 'text-accent-red'}`}>
+            <IndianRupee className="w-4 h-4 mr-1" />
+            {impacts.savings > 0 ? '+' : ''}{impacts.savings}
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'happiness',
+      condition: impacts.happiness !== 0,
+      render: () => (
+        <div className={`p-4 rounded-card border flex flex-col items-center justify-center bg-white/70 shadow-sm ${impacts.happiness > 0 ? 'border-accent-yellow/50' : 'border-neutral-soft/30'}`}>
+          <span className="text-caption font-bold uppercase text-neutral-soft mb-1">{t('happiness')}</span>
+            <div className={`text-h3 font-bold flex items-center ${impacts.happiness > 0 ? 'text-accent-yellow' : 'text-neutral-soft'}`}>
+            <Smile className="w-5 h-5 mr-1" />
+            {impacts.happiness > 0 ? '+' : ''}{impacts.happiness}%
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'health',
+      condition: impacts.health !== 0,
+      render: () => (
+        <div className={`p-4 rounded-card border flex flex-col items-center justify-center bg-white/70 shadow-sm ${impacts.health > 0 ? 'border-accent-pink/50' : 'border-accent-red/50'}`}>
+          <span className="text-caption font-bold uppercase text-neutral-soft mb-1">{t('health')}</span>
+            <div className={`text-h3 font-bold flex items-center ${impacts.health > 0 ? 'text-accent-pink' : 'text-accent-red'}`}>
+            <Heart className="w-5 h-5 mr-1" />
+            {impacts.health > 0 ? '+' : ''}{impacts.health}%
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'relationships',
+      condition: relImpact !== 0,
+      render: () => (
+        <div className={`p-4 rounded-card border flex flex-col items-center justify-center bg-white/70 shadow-sm ${relImpact > 0 ? 'border-accent-purple/50' : 'border-accent-red/50'}`}>
+          <span className="text-caption font-bold uppercase text-neutral-soft mb-1">{t('relationships')}</span>
+            <div className={`text-h3 font-bold flex items-center ${relImpact > 0 ? 'text-accent-purple' : 'text-accent-red'}`}>
+            <Users className="w-5 h-5 mr-1" />
+            {relImpact > 0 ? '+' : ''}{relImpact}%
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'debt',
+      condition: impacts.debt !== 0,
+      render: () => (
+        <div className={`p-4 rounded-card border flex flex-col items-center justify-center bg-white/70 shadow-sm ${impacts.debt < 0 ? 'border-accent-green/50' : 'border-accent-red/50'}`}>
+          <span className="text-caption font-bold uppercase text-neutral-soft mb-1">{t('debt')}</span>
+            <div className={`text-h3 font-bold flex items-center ${impacts.debt < 0 ? 'text-accent-green' : 'text-accent-red'}`}>
+            {impacts.debt > 0 ? <TrendingUp className="w-5 h-5 mr-1" /> : <TrendingDown className="w-5 h-5 mr-1" />}
+            {impacts.debt > 0 ? '+' : ''}{impacts.debt}
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  const activeItems = gridItems.filter(i => i.condition);
+
   return (
-    <div className="flex flex-col gap-6 animate-fade-in justify-center w-full min-h-full">
+    <div className="flex flex-col gap-6 justify-center w-full min-h-full">
       
-      {/* Result Story Card */}
-      <div className="glass-card p-8 rounded-card text-center shadow-xl border-white/60 relative z-10">
+      {/* Result Story Card - Pop In */}
+      <div className="glass-card p-8 rounded-card text-center shadow-xl border-white/60 relative z-10 opacity-0 animate-pop-in">
         
         {/* Share Button (Top Right) */}
         <button 
@@ -145,67 +216,21 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
         )}
       </div>
 
-      {/* Stat Changes Grid - Naturally flows */}
+      {/* Stat Changes Grid - Staggered Fade Up */}
       <div className="grid grid-cols-2 gap-4 w-full">
-        
-        {/* Savings Impact */}
-        {impacts.savings !== 0 && (
-          <div className={`p-4 rounded-card border flex flex-col items-center justify-center bg-white/70 shadow-sm ${impacts.savings > 0 ? 'border-accent-green/50' : 'border-accent-red/50'}`}>
-            <span className="text-caption font-bold uppercase text-neutral-soft mb-1">{t('savings')}</span>
-            <div className={`text-h3 font-bold flex items-center ${impacts.savings > 0 ? 'text-accent-green' : 'text-accent-red'}`}>
-              <IndianRupee className="w-4 h-4 mr-1" />
-              {impacts.savings > 0 ? '+' : ''}{impacts.savings}
-            </div>
+        {activeItems.map((item, index) => (
+          <div 
+            key={item.id} 
+            className="opacity-0 animate-fade-in-up"
+            style={{ animationDelay: `${200 + (index * 100)}ms` }}
+          >
+            {item.render()}
           </div>
-        )}
-
-        {/* Happiness Impact */}
-        {impacts.happiness !== 0 && (
-          <div className={`p-4 rounded-card border flex flex-col items-center justify-center bg-white/70 shadow-sm ${impacts.happiness > 0 ? 'border-accent-yellow/50' : 'border-neutral-soft/30'}`}>
-            <span className="text-caption font-bold uppercase text-neutral-soft mb-1">{t('happiness')}</span>
-             <div className={`text-h3 font-bold flex items-center ${impacts.happiness > 0 ? 'text-accent-yellow' : 'text-neutral-soft'}`}>
-              <Smile className="w-5 h-5 mr-1" />
-              {impacts.happiness > 0 ? '+' : ''}{impacts.happiness}%
-            </div>
-          </div>
-        )}
-
-         {/* Health Impact */}
-         {impacts.health !== 0 && (
-          <div className={`p-4 rounded-card border flex flex-col items-center justify-center bg-white/70 shadow-sm ${impacts.health > 0 ? 'border-accent-pink/50' : 'border-accent-red/50'}`}>
-            <span className="text-caption font-bold uppercase text-neutral-soft mb-1">{t('health')}</span>
-             <div className={`text-h3 font-bold flex items-center ${impacts.health > 0 ? 'text-accent-pink' : 'text-accent-red'}`}>
-              <Heart className="w-5 h-5 mr-1" />
-              {impacts.health > 0 ? '+' : ''}{impacts.health}%
-            </div>
-          </div>
-        )}
-        
-        {/* Relationships Impact */}
-        {relImpact !== 0 && (
-          <div className={`p-4 rounded-card border flex flex-col items-center justify-center bg-white/70 shadow-sm ${relImpact > 0 ? 'border-accent-purple/50' : 'border-accent-red/50'}`}>
-            <span className="text-caption font-bold uppercase text-neutral-soft mb-1">{t('relationships')}</span>
-             <div className={`text-h3 font-bold flex items-center ${relImpact > 0 ? 'text-accent-purple' : 'text-accent-red'}`}>
-              <Users className="w-5 h-5 mr-1" />
-              {relImpact > 0 ? '+' : ''}{relImpact}%
-            </div>
-          </div>
-        )}
-
-         {/* Debt Impact */}
-         {impacts.debt !== 0 && (
-          <div className={`p-4 rounded-card border flex flex-col items-center justify-center bg-white/70 shadow-sm ${impacts.debt < 0 ? 'border-accent-green/50' : 'border-accent-red/50'}`}>
-            <span className="text-caption font-bold uppercase text-neutral-soft mb-1">{t('debt')}</span>
-             <div className={`text-h3 font-bold flex items-center ${impacts.debt < 0 ? 'text-accent-green' : 'text-accent-red'}`}>
-              {impacts.debt > 0 ? <TrendingUp className="w-5 h-5 mr-1" /> : <TrendingDown className="w-5 h-5 mr-1" />}
-              {impacts.debt > 0 ? '+' : ''}{impacts.debt}
-            </div>
-          </div>
-        )}
+        ))}
       </div>
 
-      {/* Primary CTA Button - Sticky at bottom to ensure visibility */}
-      <div className="sticky bottom-0 pb-4 pt-4 -mb-4 bg-gradient-to-t from-[#f0fdf9] via-[#f0fdf9]/95 to-transparent z-20 mt-auto">
+      {/* Primary CTA Button - Sticky at bottom */}
+      <div className="sticky bottom-0 pb-4 pt-4 -mb-4 bg-gradient-to-t from-[#f0fdf9] via-[#f0fdf9]/95 to-transparent z-20 mt-auto opacity-0 animate-fade-in" style={{ animationDelay: '600ms' }}>
         <button
           onClick={handleNextClick}
           className="w-full bg-brand text-white py-5 rounded-btn font-bold text-h3 shadow-btn hover:shadow-btn-hover hover:-translate-y-0.5 transition-all flex items-center justify-center group"
