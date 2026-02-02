@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { GameEvent, Language } from '../types';
 import { getTranslation } from '../translations';
-import { TrendingUp, TrendingDown, Heart, Smile, ArrowRight, IndianRupee, Info, ChevronDown, Users } from 'lucide-react';
+import { TrendingUp, TrendingDown, Heart, Smile, ArrowRight, IndianRupee, Info, ChevronDown, Users, Share2, Check } from 'lucide-react';
 import { playSound } from '../services/audioService';
 
 interface FeedbackViewProps {
@@ -13,6 +13,7 @@ interface FeedbackViewProps {
 export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language, onNext }) => {
   const impacts = lastEvent.impact_on_stats;
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showCopied, setShowCopied] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,6 +35,7 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
   // Reset expansion state when event changes
   useEffect(() => {
     setIsExpanded(false);
+    setShowCopied(false);
   }, [lastEvent]);
 
   if (!impacts) return null;
@@ -48,6 +50,40 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
   const handleToggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
+  
+  const handleShare = async () => {
+    playSound('click');
+    
+    const impactParts: string[] = [];
+    if (impacts.savings !== 0) impactParts.push(`💰 ${impacts.savings > 0 ? '+' : ''}₹${impacts.savings}`);
+    if (impacts.debt !== 0) impactParts.push(`📉 Debt ${impacts.debt > 0 ? '+' : ''}₹${impacts.debt}`);
+    if (impacts.happiness !== 0) impactParts.push(`🙂 ${impacts.happiness > 0 ? '+' : ''}${impacts.happiness}%`);
+    if (impacts.health !== 0) impactParts.push(`❤️ ${impacts.health > 0 ? '+' : ''}${impacts.health}%`);
+    if ((impacts.relationships || 0) !== 0) impactParts.push(`🤝 ${impacts.relationships > 0 ? '+' : ''}${impacts.relationships}%`);
+
+    const shareText = `🇮🇳 Arth Mitra Update\n\n"${lastEvent.previous_outcome_title}"\n${lastEvent.previous_outcome_desc}\n\n${impactParts.join('  |  ')}\n\nCan you balance money and life?`;
+
+    // Try Native Share
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Arth Mitra - My Financial Journey',
+          text: shareText,
+        });
+      } catch (err) {
+        console.log('Share dismissed');
+      }
+    } else {
+      // Fallback to Clipboard
+      try {
+        await navigator.clipboard.writeText(shareText);
+        setShowCopied(true);
+        setTimeout(() => setShowCopied(false), 2500);
+      } catch (err) {
+        console.error('Failed to copy', err);
+      }
+    }
+  };
 
   // Safe check for relationships since it might not exist in old events if not migrated
   const relImpact = impacts.relationships || 0;
@@ -57,6 +93,23 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
       
       {/* Result Story Card */}
       <div className="glass-card p-8 rounded-card text-center shadow-xl border-white/60 relative z-10">
+        
+        {/* Share Button (Top Right) */}
+        <button 
+           onClick={handleShare}
+           className="absolute top-4 right-4 p-2.5 rounded-full bg-white/50 hover:bg-white text-brand/60 hover:text-brand transition-all shadow-sm active:scale-95 group"
+           title={t('share_button')}
+        >
+           {showCopied ? (
+             <div className="flex items-center gap-1.5">
+               <Check size={16} className="text-accent-green" strokeWidth={3} />
+               <span className="text-[10px] font-bold text-accent-green uppercase tracking-wide animate-fade-in">{t('copied')}</span>
+             </div>
+           ) : (
+             <Share2 size={18} />
+           )}
+        </button>
+
         <div className="inline-block px-4 py-1.5 rounded-full bg-accent-yellow/20 text-brand text-caption font-bold tracking-wide uppercase mb-6">
           Result
         </div>

@@ -160,6 +160,18 @@ export const UI_TEXT = {
     en: "Close",
     hi: "बंद करें",
     hinglish: "Band Karein"
+  },
+  
+  // --- SHARE ---
+  share_button: {
+    en: "Share",
+    hi: "साझा करें",
+    hinglish: "Share"
+  },
+  copied: {
+    en: "Copied!",
+    hi: "कॉपी हो गया!",
+    hinglish: "Copied!"
   }
 };
 
