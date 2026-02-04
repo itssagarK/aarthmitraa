@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { GameState } from '../types';
 import { getTranslation } from '../translations';
-import { RefreshCcw, Trophy, AlertTriangle, Skull, Frown, TrendingUp } from 'lucide-react';
+import { RefreshCcw, Trophy, AlertTriangle, Skull, Frown, TrendingUp, Heart, Smile } from 'lucide-react';
 import { playSound } from '../services/audioService';
 import { getTip, TIP_DATABASE } from '../data/tips';
 
@@ -73,17 +73,25 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
       break;
   }
 
-  // Get Role specific tip
+  // Get Specific Recovery Tips based on Reason
   const role = state.profile?.occupation || 'Worker';
   let tipText = '';
+  let tipIcon = <TrendingUp size={18} strokeWidth={2.5} />; // Default icon
 
   if (reason === 'debt') {
+    // Role-specific bankruptcy tip
     const bankruptcyKey = `${role}_bankruptcy`;
-    if (TIP_DATABASE[bankruptcyKey]) {
-      tipText = getTip(bankruptcyKey, state.language);
-    } else {
-      tipText = getTip('default_bankruptcy', state.language);
-    }
+    tipText = TIP_DATABASE[bankruptcyKey] 
+      ? getTip(bankruptcyKey, state.language) 
+      : getTip('default_bankruptcy', state.language);
+  } else if (reason === 'survival') {
+    tipText = getTip('recovery_survival', state.language);
+  } else if (reason === 'health') {
+    tipText = getTip('recovery_health', state.language);
+    tipIcon = <Heart size={18} strokeWidth={2.5} />;
+  } else if (reason === 'happiness') {
+    tipText = getTip('recovery_happiness', state.language);
+    tipIcon = <Smile size={18} strokeWidth={2.5} />;
   }
 
   const handleRestartClick = () => {
@@ -110,8 +118,8 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
         </p>
       </div>
 
-      {/* RECOVERY TRICK CARD */}
-      {reason === 'debt' && (
+      {/* RECOVERY TRICK CARD - Shows for all failure/warning states */}
+      {tipText && (
         <div className="bg-white/80 border border-brand/20 p-5 rounded-2xl text-left shadow-sm relative overflow-hidden group opacity-0 animate-slide-in-right" style={{ animationDelay: '400ms' }}>
           <div className="absolute top-0 right-0 w-16 h-16 bg-accent-yellow/10 rounded-bl-full -mr-2 -mt-2"></div>
           <div className="relative z-10">
@@ -120,7 +128,7 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
              </h4>
              <div className="flex gap-3 items-start">
                 <div className="bg-accent-yellow/20 p-2 rounded-full shrink-0 text-brand-dark mt-0.5">
-                   <TrendingUp size={18} strokeWidth={2.5} />
+                   {tipIcon}
                 </div>
                 <p className="text-body font-medium text-neutral-dark leading-snug">
                   {tipText}

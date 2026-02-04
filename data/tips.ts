@@ -70,6 +70,23 @@ export const TIP_DATABASE: Record<string, Record<Language, string>> = {
     en: "Track Expenses: Write down every ₹10 spent. Cut tea/snacks cost by 50% immediately.",
     hi: "खर्चे लिखें: हर ₹10 का हिसाब रखें। चाय/नाश्ते का खर्च तुरंत आधा कर दें।",
     hinglish: "Ek diary mein har kharcha likho. Faltu kharche (chai/snacks) aadha kar do."
+  },
+
+  // --- Other Recovery Tips ---
+  recovery_health: {
+    en: "Recovery: Prioritize sleep and home-cooked meals. Wealth is useless without health.",
+    hi: "सुझाव: नींद और घर के खाने को प्राथमिकता दें। सेहत के बिना दौलत बेकार है।",
+    hinglish: "Suggestion: Sleep aur ghar ka khana prioritize karo. Health ke bina wealth useless hai."
+  },
+  recovery_happiness: {
+    en: "Recovery: Reconnect with friends or community. Isolation makes hard times harder.",
+    hi: "सुझाव: दोस्तों या समाज से जुड़ें। अकेलेपन में मुश्किलें और बड़ी लगती हैं।",
+    hinglish: "Suggestion: Friends ya community se connect karo. Akelepan mein problems badi lagti hain."
+  },
+  recovery_survival: {
+    en: "Next Step: You survived, but the debt is dangerous. Aggressively pay off high-interest loans now.",
+    hi: "अगला कदम: आप बच तो गए, लेकिन कर्ज खतरनाक है। अब सबसे पहले ज्यादा ब्याज वाला कर्ज चुकाएं।",
+    hinglish: "Next Step: Bach toh gaye, par udhaar dangerous hai. High-interest loan turant chukao."
   }
 };
 
