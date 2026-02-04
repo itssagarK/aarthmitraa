@@ -72,7 +72,51 @@ export const TIP_DATABASE: Record<string, Record<Language, string>> = {
     hinglish: "Ek diary mein har kharcha likho. Faltu kharche (chai/snacks) aadha kar do."
   },
 
-  // --- Other Recovery Tips ---
+  // --- Health Recovery Tips (Role Specific) ---
+  Farmer_health_recovery: {
+    en: "Fields demand strength. Eat hearty meals and rest during peak sun heat.",
+    hi: "खेती में ताकत लगती है। अच्छा खाएं और दोपहर की धूप में आराम करें।",
+    hinglish: "Farming mein taqat lagti hai. Acha khao aur dhoop mein rest karo."
+  },
+  Shopkeeper_health_recovery: {
+    en: "Sitting all day is a silent killer. Walk around your shop when empty.",
+    hi: "दिन भर बैठे रहना खतरनाक है। जब ग्राहक न हों तो थोड़ा टहलें।",
+    hinglish: "Din bhar baithe rehna dangerous hai. Shop mein walk kiya karo."
+  },
+  Student_health_recovery: {
+    en: "Your brain needs sleep to learn. Don't trade sleep for study.",
+    hi: "दिमाग को सीखने के लिए नींद चाहिए। पढ़ाई के लिए नींद कुर्बान न करें।",
+    hinglish: "Brain ko seekhne ke liye sleep chahiye. Padhai ke liye neend mat chodo."
+  },
+  Worker_health_recovery: {
+    en: "Your body is your machine. Oiling (Rest) and Repair (Food) are mandatory.",
+    hi: "शरीर ही आपकी मशीन है। आराम और खाना इसके लिए ईंधन है।",
+    hinglish: "Body hi aapki machine hai. Rest aur khana iska fuel hai."
+  },
+
+  // --- Happiness Recovery Tips (Role Specific) ---
+  Farmer_happiness_recovery: {
+    en: "Crops may fail, but community remains. Share hookah/tea at the Chaupal.",
+    hi: "फसल खराब हो सकती है, पर समाज नहीं। चौपाल पर दोस्तों से मिलें।",
+    hinglish: "Fasal kharab ho sakti hai, par samaj nahi. Chaupal par doston se milo."
+  },
+  Shopkeeper_happiness_recovery: {
+    en: "Profit isn't everything. Close the shutter early one day for family.",
+    hi: "मुनाफा ही सब कुछ नहीं है। परिवार के लिए एक दिन दुकान जल्दी बढ़ाएं।",
+    hinglish: "Profit sab kuch nahi hai. Family ke liye ek din shop jaldi band karo."
+  },
+  Student_happiness_recovery: {
+    en: "Marks are just numbers. Play sports and laugh with friends to stay sane.",
+    hi: "नंबर सिर्फ नंबर हैं। दोस्तों के साथ खेलें और हंसें, दिमाग शांत रहेगा।",
+    hinglish: "Marks sirf numbers hain. Friends ke saath khelo aur enjoy karo."
+  },
+  Worker_happiness_recovery: {
+    en: "Leave work at the factory gate. Your evening belongs to your family.",
+    hi: "काम को फैक्ट्री के गेट पर छोड़ आएं। शाम आपके परिवार की है।",
+    hinglish: "Kaam ko factory mein chodo. Shaam aapki family ki hai."
+  },
+
+  // --- Generic Fallbacks ---
   recovery_health: {
     en: "Recovery: Prioritize sleep and home-cooked meals. Wealth is useless without health.",
     hi: "सुझाव: नींद और घर के खाने को प्राथमिकता दें। सेहत के बिना दौलत बेकार है।",

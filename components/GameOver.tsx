@@ -87,10 +87,18 @@ export const GameOver: React.FC<GameOverProps> = ({ state, onRestart }) => {
   } else if (reason === 'survival') {
     tipText = getTip('recovery_survival', state.language);
   } else if (reason === 'health') {
-    tipText = getTip('recovery_health', state.language);
+    // Try role-specific health tip first
+    const healthKey = `${role}_health_recovery`;
+    tipText = TIP_DATABASE[healthKey]
+        ? getTip(healthKey, state.language)
+        : getTip('recovery_health', state.language);
     tipIcon = <Heart size={18} strokeWidth={2.5} />;
   } else if (reason === 'happiness') {
-    tipText = getTip('recovery_happiness', state.language);
+    // Try role-specific happiness tip first
+    const happyKey = `${role}_happiness_recovery`;
+    tipText = TIP_DATABASE[happyKey]
+        ? getTip(happyKey, state.language)
+        : getTip('recovery_happiness', state.language);
     tipIcon = <Smile size={18} strokeWidth={2.5} />;
   }
 
