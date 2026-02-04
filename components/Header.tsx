@@ -23,6 +23,13 @@ export const Header: React.FC<HeaderProps> = ({ language, onLanguageChange, onOp
     onOpenSettings();
   };
 
+  const handleLanguageClick = (lang: Language) => {
+    if (lang !== language) {
+       playSound('click');
+       onLanguageChange(lang);
+    }
+  };
+
   return (
     <div className="w-full px-4 py-3 transition-all">
       <div className="max-w-[500px] mx-auto flex items-center justify-between">
@@ -54,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({ language, onLanguageChange, onOp
               {languages.map((lang) => (
                 <button
                   key={lang.code}
-                  onClick={() => onLanguageChange(lang.code)}
+                  onClick={() => handleLanguageClick(lang.code)}
                   className={`
                     px-2 sm:px-3 py-1.5 rounded-full text-caption font-bold transition-all duration-200
                     ${language === lang.code 

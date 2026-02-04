@@ -48,6 +48,7 @@ export const FeedbackView: React.FC<FeedbackViewProps> = ({ lastEvent, language,
   };
 
   const handleToggleExpand = () => {
+    playSound('click');
     setIsExpanded(!isExpanded);
   };
   

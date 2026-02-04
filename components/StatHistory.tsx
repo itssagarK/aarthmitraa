@@ -1,6 +1,7 @@
 import React from 'react';
 import { StatTransaction } from '../types';
 import { X, IndianRupee, TrendingUp, TrendingDown, Smile, Heart, Users, Plus, Minus } from 'lucide-react';
+import { playSound } from '../services/audioService';
 
 interface StatHistoryProps {
   type: 'savings' | 'debt' | 'happiness' | 'health' | 'relationships';
@@ -14,12 +15,17 @@ export const StatHistory: React.FC<StatHistoryProps> = ({ type, history, onClose
   // Handle undefined relationships for old saves safely
   const filteredHistory = history.filter(t => (t.changes[type] || 0) !== 0).reverse();
 
+  const handleClose = () => {
+    playSound('click');
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-neutral-dark/40 backdrop-blur-sm animate-fade-in" 
-        onClick={onClose}
+        onClick={handleClose}
       />
       
       {/* Modal Content */}
@@ -36,7 +42,7 @@ export const StatHistory: React.FC<StatHistoryProps> = ({ type, history, onClose
             {title} History
           </h3>
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="w-8 h-8 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-soft hover:bg-neutral-100 transition-colors"
           >
             <X className="w-5 h-5" />
