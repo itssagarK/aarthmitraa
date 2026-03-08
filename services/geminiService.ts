@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { GameState, PlayerProfile, Language } from "../types";
+import { GameState, PlayerProfile, Language, GameEvent } from "../types";
+import { PREDEFINED_SCENARIOS } from "../data/scenarios";
 
 const apiKey = process.env.API_KEY;
 const MODEL_NAME = "gemini-3-flash-preview";
@@ -99,7 +100,38 @@ const responseSchema: Schema = {
   required: ["narrative_hook", "choices", "impact_on_stats", "isGameOver", "financial_explanation"],
 };
 
+// --- HELPER: Get Predefined Scenario ---
+const getPredefinedScenario = (occupation: string, history: string[]): any | null => {
+  // Filter by occupation
+  const relevant = PREDEFINED_SCENARIOS.filter(s => s.occupation === occupation);
+  // Filter out already seen scenarios (by narrative hook matching)
+  const available = relevant.filter(s => !history.includes(s.narrative_hook));
+  
+  if (available.length === 0) return null;
+  
+  // Pick random
+  const randomIndex = Math.floor(Math.random() * available.length);
+  return available[randomIndex];
+};
+
 export const startSimulation = async (profile: PlayerProfile, lang: Language) => {
+  // 50% chance to use a predefined scenario for the start
+  if (Math.random() < 0.5) {
+    const predefined = getPredefinedScenario(profile.occupation, []);
+    if (predefined) {
+      console.log("Using predefined start scenario:", predefined.id);
+      return {
+        narrative_hook: predefined.narrative_hook,
+        choices: predefined.choices,
+        impact_on_stats: { savings: 0, debt: 0, happiness: 0, health: 0, relationships: 0 },
+        previous_outcome_title: "",
+        previous_outcome_desc: "",
+        financial_explanation: "",
+        isGameOver: false
+      };
+    }
+  }
+
   const langInstruction = getLangContext(lang);
   
   const prompt = `
@@ -196,7 +228,24 @@ export const nextTurn = async (
 
     const text = response.text;
     if (!text) throw new Error("No response from AI");
-    return JSON.parse(text);
+    
+    const aiData = JSON.parse(text);
+
+    // --- HYBRID INJECTION ---
+    // 40% chance to inject a predefined scenario IF no critical status flags are present
+    // We don't want to interrupt a crisis (like debt collectors) with a random event
+    if (Math.random() < 0.4 && statusFlags === "" && currentState.profile) {
+      const predefined = getPredefinedScenario(currentState.profile.occupation, currentState.history);
+      if (predefined) {
+        console.log("Injecting predefined scenario:", predefined.id);
+        // Overwrite the NEXT scenario part, but keep the PREVIOUS feedback from AI
+        aiData.narrative_hook = predefined.narrative_hook;
+        aiData.choices = predefined.choices;
+      }
+    }
+
+    return aiData;
+
   } catch (error) {
     console.error("Error generating next turn:", error);
     throw error;
