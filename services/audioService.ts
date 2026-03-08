@@ -47,7 +47,7 @@ const soundAssets = {
   }),
   // Calm ambient background music
   bgm: new Howl({
-    src: ['https://assets.mixkit.co/active_storage/sfx/131/131-preview.mp3'], // Calm nature/birds/guitar ambience
+    src: ['/sounds/the_mountain-calm-piano-133291.mp3'],
     html5: true, // Use HTML5 Audio for larger files (streaming)
     loop: true,
     volume: currentMusicVol
