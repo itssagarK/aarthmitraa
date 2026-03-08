@@ -78,7 +78,7 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Open [https://aarthmitraa.vercel.app] in your browser.
 
 ---
 
